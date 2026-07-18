@@ -86,6 +86,7 @@ function ProductsAdmin() {
       device: { label: "Устройства" },
       liquid: { label: "Жидкости" },
       consumable: { label: "Расходники" },
+      snus: { label: "Снюс" },
     };
     const list = uniqueCategories.map((id) => {
       const mapped = CATEGORY_MAP[id];
@@ -104,6 +105,7 @@ function ProductsAdmin() {
       { id: "device", label: "Устройство" },
       { id: "liquid", label: "Жидкость" },
       { id: "consumable", label: "Расходник" },
+      { id: "snus", label: "Снюс" },
     ];
     const unique = Array.from(new Set(rows.map((r) => r.category)));
     const list = [...defaults];
@@ -116,15 +118,15 @@ function ProductsAdmin() {
     return list;
   }, [rows]);
 
-  async function reload() {
-    setLoading(true);
+  async function reload(silent = false) {
+    if (!silent) setLoading(true);
     try {
       const data = (await list()) as unknown as ProductRow[];
       setRows(data);
     } catch (e: any) {
       toast.error(e?.message ?? "Ошибка загрузки");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }
   useEffect(() => {
@@ -189,6 +191,38 @@ function ProductsAdmin() {
 
   async function save() {
     if (!draft) return;
+    const isEdit = !!draft.id;
+    const savedProduct: ProductRow = {
+      id: draft.id || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2)),
+      slug: draft.slug.trim(),
+      name: draft.name.trim(),
+      brand: draft.brand.trim(),
+      category: draft.category,
+      price: Number(draft.price) || 0,
+      flavor: draft.flavor || null,
+      puffs: draft.puffs || null,
+      volume: draft.volume || null,
+      emoji: draft.emoji.trim() || "🔥",
+      color: draft.color,
+      image_url: draft.image_url || null,
+      in_stock: draft.in_stock,
+      sort_order: Number(draft.sort_order) || 0,
+    };
+
+    // Optimistically update local state instantly
+    if (isEdit) {
+      setRows((prev) => prev.map((r) => (r.id === draft.id ? savedProduct : r)));
+    } else {
+      setRows((prev) => [...prev, savedProduct].sort((a, b) => a.sort_order - b.sort_order));
+    }
+
+    // Automatically switch filter to the product's new category so the user can see it!
+    setFilter(draft.category);
+    setBrand("all");
+    setFlavor("all");
+
+    setDraft(null);
+
     try {
       await upsert({
         data: {
@@ -208,31 +242,42 @@ function ProductsAdmin() {
           sort_order: Number(draft.sort_order) || 0,
         },
       });
-      toast.success(draft.id ? "Сохранено" : "Товар добавлен");
-      setDraft(null);
-      await reload();
+      toast.success(isEdit ? "Сохранено" : "Товар добавлен");
+      await reload(true);
     } catch (e: any) {
       toast.error(e?.message ?? "Не удалось сохранить");
+      await reload();
     }
   }
 
   async function del(row: ProductRow) {
     if (!confirm(`Удалить «${row.name}»?`)) return;
+    
+    // Optimistically remove from local state instantly
+    setRows((prev) => prev.filter((r) => r.id !== row.id));
+    
     try {
       await remove({ data: { id: row.id } });
       toast.success("Удалено");
-      await reload();
+      await reload(true);
     } catch (e: any) {
       toast.error(e?.message ?? "Не удалось удалить");
+      await reload();
     }
   }
 
   async function flipStock(row: ProductRow) {
+    const nextInStock = !row.in_stock;
+    
+    // Optimistically update local state instantly
+    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, in_stock: nextInStock } : r)));
+    
     try {
-      await toggle({ data: { id: row.id, in_stock: !row.in_stock } });
-      setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, in_stock: !row.in_stock } : r)));
+      await toggle({ data: { id: row.id, in_stock: nextInStock } });
     } catch (e: any) {
       toast.error(e?.message ?? "Ошибка");
+      // Rollback on error
+      setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, in_stock: row.in_stock } : r)));
     }
   }
 
@@ -540,3 +585,4 @@ function SubRow({
     </div>
   );
 }
+

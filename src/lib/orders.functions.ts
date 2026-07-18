@@ -98,7 +98,12 @@ export const createOrder = createServerFn({ method: "POST" })
     // Build cancellation link from the current request origin.
     let cancelUrl: string | undefined;
     try {
-      const clientOrigin = data.origin || "https://9dlfgdrk-8087.euw.devtunnels.ms";
+      let clientOrigin = data.origin || "https://9dlfgdrk-8087.euw.devtunnels.ms";
+      // If the origin is local (localhost or 127.0.0.1), Telegram won't be able to access it.
+      // We force the public dev tunnel URL so the link in Telegram works on any device.
+      if (clientOrigin.includes("localhost") || clientOrigin.includes("127.0.0.1")) {
+        clientOrigin = "https://9dlfgdrk-8087.euw.devtunnels.ms";
+      }
       cancelUrl = `${clientOrigin}/order-cancel?token=${cancellationToken}`;
     } catch (err) {
       console.warn("[order] could not build cancel URL from request", err);

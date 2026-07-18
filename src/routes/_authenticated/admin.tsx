@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { LogOut, Package, Users, Clock } from "lucide-react";
@@ -8,9 +9,17 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminLayout() {
   const navigate = useNavigate();
+  const [isSigningOut, setIsSigningOut] = useState(false);
   async function signOut() {
-    await supabase.auth.signOut();
-    navigate({ to: "/admin/login", replace: true });
+    setIsSigningOut(true);
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    } finally {
+      setIsSigningOut(false);
+      navigate({ to: "/admin/login", replace: true });
+    }
   }
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -45,9 +54,10 @@ function AdminLayout() {
             </Link>
             <button
               onClick={signOut}
-              className="ml-2 px-3 py-1.5 rounded-lg text-sm font-semibold bg-muted hover:bg-muted/70 flex items-center gap-1.5"
+              disabled={isSigningOut}
+              className="ml-2 px-3 py-1.5 rounded-lg text-sm font-semibold bg-muted hover:bg-muted/70 flex items-center gap-1.5 disabled:opacity-50"
             >
-              <LogOut className="w-4 h-4" /> Выйти
+              <LogOut className="w-4 h-4" /> {isSigningOut ? "Выход..." : "Выйти"}
             </button>
           </nav>
         </div>

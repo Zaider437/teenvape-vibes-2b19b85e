@@ -3,6 +3,9 @@ compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 main = ".output/server/index.mjs"
 
+[dev]
+port = 8087
+
 [assets]
 binding = "ASSETS"
 directory = ".output/public"
@@ -25,3 +28,4 @@ SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = "587"
 SMTP_USER = "375333631370moroz@gmail.com"
 SMTP_PASS = "mhfaznumbjsdqgba"
+

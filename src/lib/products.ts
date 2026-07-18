@@ -24,7 +24,7 @@ export type Product = {
   slug: string;
   name: string;
   brand: string;
-  category: "device" | "disposable" | "liquid" | "consumable" | string;
+  category: "device" | "disposable" | "liquid" | "consumable" | "snus" | string;
   price: number;
   flavor?: string | null;
   puffs?: string | null;
@@ -78,6 +78,7 @@ export const CATEGORIES = [
   { id: "device", label: "Устройства", emoji: "⚡" },
   { id: "liquid", label: "Жидкости", emoji: "🧪" },
   { id: "consumable", label: "Расходники", emoji: "🧩" },
+  { id: "snus", label: "Снюс", emoji: "🍃" },
 ] as const;
 
 export function formatImageUrl(url: string | null | undefined): string | null {

@@ -56,7 +56,8 @@ export function Shop() {
     category === "liquid" ||
     category === "consumable" ||
     category === "device" ||
-    category === "disposable";
+    category === "disposable" ||
+    category === "snus";
 
   const inCategory = useMemo(
     () => (category === "all" ? products : products.filter((p) => p.category === category)),
@@ -83,6 +84,7 @@ export function Shop() {
       device: { label: "Устройства", emoji: "⚡" },
       liquid: { label: "Жидкости", emoji: "🧪" },
       consumable: { label: "Расходники", emoji: "🧩" },
+      snus: { label: "Снюс", emoji: "🍃" },
     };
     const list = uniqueCategories.map((id) => {
       const mapped = CATEGORY_MAP[id];
@@ -620,3 +622,4 @@ function Footer() {
     </footer>
   );
 }
+

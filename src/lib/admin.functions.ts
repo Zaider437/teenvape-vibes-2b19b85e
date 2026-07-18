@@ -59,18 +59,18 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 }
 
 const productSchema = z.object({
-  id: z.string().uuid().optional(),
-  slug: z.string().trim().min(1).max(120),
-  name: z.string().trim().min(1).max(200),
-  brand: z.string().trim().min(1).max(120),
-  category: z.string().trim().min(1).max(120),
+  id: z.string().optional().nullable(),
+  slug: z.string().trim().min(1).max(1000),
+  name: z.string().trim().min(1).max(1000),
+  brand: z.string().trim().min(1).max(1000),
+  category: z.string().trim().min(1).max(1000),
   price: z.number().nonnegative(),
-  flavor: z.string().trim().max(200).optional().nullable(),
-  puffs: z.string().trim().max(120).optional().nullable(),
-  volume: z.string().trim().max(120).optional().nullable(),
-  emoji: z.string().trim().min(1).max(8),
-  color: z.enum(["pink", "cyan", "lime"]),
-  image_url: z.string().trim().max(500).optional().nullable(),
+  flavor: z.string().trim().max(1000).optional().nullable(),
+  puffs: z.string().trim().max(1000).optional().nullable(),
+  volume: z.string().trim().max(1000).optional().nullable(),
+  emoji: z.string().trim().min(1).max(100),
+  color: z.string().trim().min(1).max(100),
+  image_url: z.string().trim().max(2000).optional().nullable(),
   in_stock: z.boolean(),
   sort_order: z.number().int(),
 });
@@ -96,6 +96,8 @@ export const adminUpsertProduct = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => productSchema.parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    
     const row = {
       ...data,
       flavor: data.flavor?.trim() || null,
@@ -103,29 +105,34 @@ export const adminUpsertProduct = createServerFn({ method: "POST" })
       volume: data.volume?.trim() || null,
       image_url: data.image_url?.trim() || null,
     };
-    if (data.id) {
-      const { error } = await context.supabase
+    
+    if (data.id && data.id.trim() !== "") {
+      const { id, ...updateFields } = row;
+      const { error } = await supabaseAdmin
         .from("products" as any)
-        .update(row)
-        .eq("id", data.id);
+        .update(updateFields)
+        .eq("id", id);
       if (error) throw error;
       return { id: data.id };
     }
-    const { data: inserted, error } = await (context.supabase as any)
-      .from("products")
-      .insert(row)
+    
+    const { id, ...insertFields } = row;
+    const { data: inserted, error } = await supabaseAdmin
+      .from("products" as any)
+      .insert(insertFields)
       .select("id")
       .single();
     if (error) throw error;
-    return { id: (inserted as { id: string }).id };
+    return { id: (inserted as unknown as { id: string }).id };
   });
 
 export const adminDeleteProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .inputValidator((input: unknown) => z.object({ id: z.string() }).parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase.from("products" as any).delete().eq("id", data.id);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("products" as any).delete().eq("id", data.id);
     if (error) throw error;
     return { ok: true };
   });
@@ -133,11 +140,12 @@ export const adminDeleteProduct = createServerFn({ method: "POST" })
 export const adminToggleStock = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ id: z.string().uuid(), in_stock: z.boolean() }).parse(input),
+    z.object({ id: z.string(), in_stock: z.boolean() }).parse(input),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
       .from("products" as any)
       .update({ in_stock: data.in_stock })
       .eq("id", data.id);

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getTelegramLoginConfig, telegramLogin, type TelegramAuthData } from "@/lib/telegram-auth.functions";
+import { z } from "zod";
 
 declare global {
   interface Window {
@@ -13,6 +14,9 @@ declare global {
 
 export const Route = createFileRoute("/admin/login")({
   ssr: false,
+  validateSearch: z.object({
+    next: z.string().optional(),
+  }),
   component: AdminLogin,
 });
 
