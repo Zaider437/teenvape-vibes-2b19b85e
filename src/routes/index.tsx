@@ -210,7 +210,7 @@ export function Shop() {
           </button>
         </div>
       ) : (
-        <section className="px-4 mt-4 grid grid-cols-2 gap-3">
+        <section className="px-4 mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
           {filtered.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
@@ -364,15 +364,15 @@ function ProductCard({ product }: { product: Product }) {
       <div className="aspect-square grid place-items-center text-6xl bg-primary/5 border-b border-border/60 relative overflow-hidden">
         <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(circle at 50% 50%, var(--primary) 0%, transparent 60%)" }} />
         {product.image ? (
-          <img src={product.image} alt={product.name} loading="lazy" className="relative w-full h-full object-contain p-2" />
+          <img src={product.image} alt={product.name} loading="lazy" className="relative w-full h-full object-contain p-4 sm:p-5" />
         ) : (
           <span className="drop-shadow-lg">{product.emoji}</span>
         )}
       </div>
       <div className="p-3 flex-1 flex flex-col">
         <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{product.brand}</div>
-        <div className="mt-0.5 font-bold text-sm leading-tight text-foreground truncate">{product.name}</div>
-        {product.flavor && <div className="text-xs text-muted-foreground mt-0.5 truncate">{product.flavor}</div>}
+        <div className="mt-0.5 font-bold text-xs sm:text-sm leading-tight text-foreground line-clamp-2 min-h-[2rem] flex items-center">{product.name}</div>
+        {product.flavor && <div className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 line-clamp-2 min-h-[1.5rem] flex items-center">{product.flavor}</div>}
         {product.puffs && <div className="text-[10px] text-primary mt-0.5">{product.puffs}</div>}
         {product.volume && <div className="text-[10px] text-primary mt-0.5">{product.volume}</div>}
         <div className="mt-2 flex items-center justify-between gap-2">
