@@ -81,6 +81,18 @@ export const CATEGORIES = [
   { id: "snus", label: "Снюс", emoji: "🍃" },
 ] as const;
 
+let cachedProducts: Product[] | null = null;
+let cachedProductsExpiry = 0;
+let cachedMeetingTimes: string[] | null = null;
+let cachedMeetingTimesExpiry = 0;
+
+export function invalidateProductsCache() {
+  cachedProducts = null;
+  cachedProductsExpiry = 0;
+  cachedMeetingTimes = null;
+  cachedMeetingTimesExpiry = 0;
+}
+
 export function formatImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   if (url.startsWith("/__l5e/")) {
@@ -90,6 +102,11 @@ export function formatImageUrl(url: string | null | undefined): string | null {
 }
 
 export async function fetchProducts(): Promise<Product[]> {
+  const now = Date.now();
+  if (cachedProducts && cachedProductsExpiry > now) {
+    return cachedProducts;
+  }
+
   const fetchPromise = (async () => {
     try {
       const { supabase } = await import("@/integrations/supabase/client");
@@ -100,7 +117,7 @@ export async function fetchProducts(): Promise<Product[]> {
 
       if (error) throw error;
       if (data && data.length > 0) {
-        return data.map((p: any) => ({
+        const mapped = data.map((p: any) => ({
           id: p.id,
           slug: p.slug,
           name: p.name,
@@ -116,12 +133,21 @@ export async function fetchProducts(): Promise<Product[]> {
           in_stock: p.in_stock,
           sort_order: p.sort_order,
         }));
+        cachedProducts = mapped;
+        cachedProductsExpiry = Date.now() + 30 * 1000; // Cache for 30 seconds
+        return mapped;
       }
-      return PRODUCTS.map(p => ({ ...p, image: formatImageUrl(p.image) }));
+      const fallback = PRODUCTS.map(p => ({ ...p, image: formatImageUrl(p.image) }));
+      cachedProducts = fallback;
+      cachedProductsExpiry = Date.now() + 30 * 1000;
+      return fallback;
     } catch (err) {
       console.warn("[products] Failed to fetch from Supabase, falling back to local PRODUCTS", err);
     }
-    return PRODUCTS.map(p => ({ ...p, image: formatImageUrl(p.image) }));
+    const fallback = PRODUCTS.map(p => ({ ...p, image: formatImageUrl(p.image) }));
+    cachedProducts = fallback;
+    cachedProductsExpiry = Date.now() + 30 * 1000;
+    return fallback;
   })();
 
   const timeoutPromise = new Promise<Product[]>((resolve) =>
@@ -135,6 +161,11 @@ export async function fetchProducts(): Promise<Product[]> {
 }
 
 export async function fetchMeetingTimes(): Promise<string[]> {
+  const now = Date.now();
+  if (cachedMeetingTimes && cachedMeetingTimesExpiry > now) {
+    return cachedMeetingTimes;
+  }
+
   try {
     const { supabase } = await import("@/integrations/supabase/client");
     const { data, error } = await (supabase
@@ -144,12 +175,15 @@ export async function fetchMeetingTimes(): Promise<string[]> {
       .maybeSingle() as any);
 
     if (!error && data && data.note) {
-      return JSON.parse(data.note) as string[];
+      const parsed = JSON.parse(data.note) as string[];
+      cachedMeetingTimes = parsed;
+      cachedMeetingTimesExpiry = Date.now() + 60 * 1000; // Cache for 1 minute
+      return parsed;
     }
   } catch (err) {
     console.warn("[products] Failed to fetch meeting times, using defaults", err);
   }
-  return [
+  const defaults = [
     "15:00",
     "16:00",
     "17:00",
@@ -159,4 +193,7 @@ export async function fetchMeetingTimes(): Promise<string[]> {
     "После 21:00 — отдам там, где буду находиться. Закажите заранее!",
     "Для заказа Яндекс Доставки",
   ];
+  cachedMeetingTimes = defaults;
+  cachedMeetingTimesExpiry = Date.now() + 60 * 1000;
+  return defaults;
 }

@@ -12,7 +12,7 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
   }
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  
+
   // 1) Try standard has_role RPC check
   let isAuthorized = false;
   try {
@@ -97,7 +97,7 @@ export const adminUpsertProduct = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    
+
     const row = {
       ...data,
       flavor: data.flavor?.trim() || null,
@@ -105,7 +105,7 @@ export const adminUpsertProduct = createServerFn({ method: "POST" })
       volume: data.volume?.trim() || null,
       image_url: data.image_url?.trim() || null,
     };
-    
+
     if (data.id && data.id.trim() !== "") {
       const { id, ...updateFields } = row;
       const { error } = await supabaseAdmin
@@ -115,7 +115,7 @@ export const adminUpsertProduct = createServerFn({ method: "POST" })
       if (error) throw error;
       return { id: data.id };
     }
-    
+
     const { id, ...insertFields } = row;
     const { data: inserted, error } = await supabaseAdmin
       .from("products" as any)
@@ -239,7 +239,7 @@ export const adminUpdateMeetingTimes = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ times: z.array(z.string()) }).parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    
+
     const { data: existing } = await (context.supabase
       .from("admin_telegram_users" as any)
       .select("id")
@@ -264,8 +264,16 @@ export const adminUpdateMeetingTimes = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+let cachedAnimationSettings: any = null;
+let cachedAnimationSettingsExpiry = 0;
+
 export const getAnimationSettings = createServerFn({ method: "GET" })
   .handler(async () => {
+    const now = Date.now();
+    if (cachedAnimationSettings && cachedAnimationSettingsExpiry > now) {
+      return cachedAnimationSettings;
+    }
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await (supabaseAdmin
       .from("admin_telegram_users" as any)
@@ -275,9 +283,13 @@ export const getAnimationSettings = createServerFn({ method: "GET" })
     if (error) {
       console.error("Failed to fetch animation settings:", error);
     }
+    let settings = {
+      leaves: { enabled: true, from: 9, to: 11 },
+      snow: { enabled: true, from: 12, to: 2 }
+    };
     if (data && data.note) {
       try {
-        return JSON.parse(data.note) as {
+        settings = JSON.parse(data.note) as {
           leaves: { enabled: boolean; from: number; to: number };
           snow: { enabled: boolean; from: number; to: number };
         };
@@ -285,10 +297,9 @@ export const getAnimationSettings = createServerFn({ method: "GET" })
         console.error("Failed to parse animation settings:", e);
       }
     }
-    return {
-      leaves: { enabled: true, from: 9, to: 11 },
-      snow: { enabled: true, from: 12, to: 2 }
-    };
+    cachedAnimationSettings = settings;
+    cachedAnimationSettingsExpiry = now + 60 * 1000; // Cache for 1 minute
+    return settings;
   });
 
 export const adminUpdateAnimationSettings = createServerFn({ method: "POST" })
@@ -299,7 +310,7 @@ export const adminUpdateAnimationSettings = createServerFn({ method: "POST" })
   }).parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    
+
     const { data: existing } = await (context.supabase
       .from("admin_telegram_users" as any)
       .select("id")
@@ -321,6 +332,10 @@ export const adminUpdateAnimationSettings = createServerFn({ method: "POST" })
         });
       if (error) throw error;
     }
+
+    // Update cache
+    cachedAnimationSettings = data;
+    cachedAnimationSettingsExpiry = Date.now() + 60 * 1000;
     return { ok: true };
   });
 
