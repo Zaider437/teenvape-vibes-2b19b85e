@@ -72,6 +72,7 @@ const productSchema = z.object({
   emoji: z.string().trim().min(1).max(100),
   color: z.string().trim().min(1).max(100),
   image_url: z.string().trim().max(2000).optional().nullable(),
+  description: z.string().trim().max(4000).optional().nullable(),
   in_stock: z.boolean(),
   sort_order: z.number().int(),
 });
@@ -85,10 +86,11 @@ export const adminListProducts = createServerFn({ method: "GET" })
       .select("*")
       .order("sort_order", { ascending: true });
     if (error) throw error;
-    const { formatImageUrl } = await import("./products");
+    const { formatImageUrl, buildDescription } = await import("./products");
     return (data ?? []).map((p: any) => ({
       ...p,
       image_url: formatImageUrl(p.image_url),
+      description: buildDescription(p),
     }));
   });
 
@@ -106,6 +108,7 @@ export const adminUpsertProduct = createServerFn({ method: "POST" })
       volume: data.volume?.trim() || null,
       subcategory: data.subcategory?.trim() || null,
       image_url: data.image_url?.trim() || null,
+      description: data.description?.trim() || null,
     };
 
     if (data.id && data.id.trim() !== "") {

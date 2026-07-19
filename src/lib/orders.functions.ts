@@ -143,13 +143,13 @@ export const createOrder = createServerFn({ method: "POST" })
     // Send email notification via Gmail connector gateway.
     let emailSent = false;
     try {
-      const subject = `🔥 Новый заказ LoveVape #${inserted.id.slice(0, 8)}`;
+      const subject = `🔥 Новый заказ LoveVape #${insertedId.slice(0, 8)}`;
       const itemsHtml = trustedItems
         .map((i) => `<tr><td style="padding:6px 8px">${i.name}</td><td style="padding:6px 8px;text-align:center">${i.qty}</td><td style="padding:6px 8px;text-align:right">${(i.price * i.qty).toFixed(2)} BYN</td></tr>`)
         .join("");
       const html = `
         <div style="font-family:Arial,sans-serif;color:#111">
-          <h2 style="margin:0 0 12px">Новый заказ #${inserted.id.slice(0, 8)}</h2>
+          <h2 style="margin:0 0 12px">Новый заказ #${insertedId.slice(0, 8)}</h2>
           <p><b>Username Telegram:</b> ${escapeHtml(data.customer_name)}<br/>
              <b>Телефон:</b> ${escapeHtml(data.customer_phone)}<br/>
              <b>Адрес:</b> ${escapeHtml(data.customer_address)}</p>
@@ -162,7 +162,7 @@ export const createOrder = createServerFn({ method: "POST" })
         </div>`;
 
       const smtpHost = env.SMTP_HOST || getEnv("SMTP_HOST") || "smtp.gmail.com";
-      const smtpPort = 465; // Force port 465 for Cloudflare Workers compatibility
+      const smtpPort = parseInt(env.SMTP_PORT || getEnv("SMTP_PORT") || "465");
       const smtpUser = env.SMTP_USER || getEnv("SMTP_USER") || "375333631370moroz@gmail.com";
       const smtpPass = env.SMTP_PASS || getEnv("SMTP_PASS") || "mhfaznumbjsdqgba";
 
@@ -171,7 +171,7 @@ export const createOrder = createServerFn({ method: "POST" })
         const transporter = nodemailer.createTransport({
           host: smtpHost,
           port: smtpPort,
-          secure: true, // Force secure for port 465
+          secure: smtpPort === 465,
           auth: {
             user: smtpUser,
             pass: smtpPass,
@@ -202,7 +202,7 @@ export const createOrder = createServerFn({ method: "POST" })
     // Telegram notification (best-effort)
     try {
       await sendTelegramNotification({
-        orderId: inserted.id,
+        orderId: insertedId,
         customerName: data.customer_name,
         customerPhone: data.customer_phone,
         customerAddress: data.customer_address,
@@ -216,7 +216,7 @@ export const createOrder = createServerFn({ method: "POST" })
       console.warn("[order] telegram notification skipped:", err);
     }
 
-    return { id: inserted.id, emailSent, cancellationToken };
+    return { id: insertedId, emailSent, cancellationToken };
   });
 
 // Send order notification to Telegram (best-effort, non-blocking failure)

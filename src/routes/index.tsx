@@ -5,9 +5,15 @@ import { ShoppingBag, Plus, Minus, Trash2, X, Flame, CheckCircle2, Heart, Search
 import { CartProvider, useCart } from "../lib/cart";
 import { CATEGORIES, fetchProducts, formatImageUrl, type Product } from "../lib/products";
 import { createOrder, debugEnv } from "../lib/orders.functions";
-import logoAsset from "../assets/lovevape-logo.jpg.asset.json";
 import { toast, Toaster } from "sonner";
 import { FallingEffects } from "../components/FallingEffects";
+import { LoveVapeLogo } from "../components/LoveVapeLogo";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,11 +33,11 @@ export const Route = createFileRoute("/")({
 
 export function Shop() {
   const [category, setCategory] = useState<string>("all");
-  const [subcategory, setSubcategory] = useState<string>("all");
   const [brand, setBrand] = useState<string>("all");
   const [flavor, setFlavor] = useState<string>("all");
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -80,11 +86,6 @@ export function Shop() {
     return Array.from(set).sort();
   }, [inCategory, hasSubfilters, brand]);
 
-  const subcategoryOptions = useMemo(() => {
-    if (!hasSubfilters) return [] as string[];
-    return Array.from(new Set(inCategory.map((p) => p.subcategory).filter(Boolean))).sort();
-  }, [inCategory, hasSubfilters]);
-
   const dynamicCategories = useMemo(() => {
     const uniqueCategories = Array.from(new Set(products.map((p) => p.category)));
     const CATEGORY_MAP: Record<string, { label: string; emoji: string }> = {
@@ -107,7 +108,6 @@ export function Shop() {
 
   function selectCategory(id: string) {
     setCategory(id);
-    setSubcategory("all");
     setBrand("all");
     setFlavor("all");
   }
@@ -115,17 +115,16 @@ export function Shop() {
   const filtered = useMemo(() => {
     let list = inCategory;
     if (hasSubfilters) {
-      if (subcategory !== "all") list = list.filter((p) => p.subcategory === subcategory);
       if (brand !== "all") list = list.filter((p) => p.brand === brand);
       if (flavor !== "all") list = list.filter((p) => p.flavor === flavor);
     }
     const q = query.trim().toLowerCase();
     if (!q) return list;
     return list.filter((p) => {
-      const hay = [p.name, p.brand, p.flavor, p.puffs, p.volume, p.subcategory].filter(Boolean).join(" ").toLowerCase();
+      const hay = [p.name, p.brand, p.flavor, p.puffs, p.volume].filter(Boolean).join(" ").toLowerCase();
       return hay.includes(q);
     });
-  }, [inCategory, hasSubfilters, subcategory, brand, flavor, query]);
+  }, [inCategory, hasSubfilters, brand, flavor, query]);
 
 
   return (
@@ -184,14 +183,6 @@ export function Shop() {
       {/* sub-filters for liquid / consumable */}
       {hasSubfilters && (
         <div className="px-4 mt-2 space-y-2">
-          {subcategoryOptions.length > 0 && (
-            <SubFilterRow
-              label="Подкатегория"
-              options={subcategoryOptions}
-              value={subcategory}
-              onChange={setSubcategory}
-            />
-          )}
           {brandOptions.length > 0 && (
             <SubFilterRow
               label="Производитель"
@@ -230,7 +221,7 @@ export function Shop() {
       ) : (
         <section className="px-4 mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
           {filtered.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard key={p.id} product={p} onOpen={(product) => setSelectedProduct(product)} />
           ))}
         </section>
       )}
@@ -246,6 +237,39 @@ export function Shop() {
         />
       )}
       {checkoutOpen && <CheckoutSheet onClose={() => setCheckoutOpen(false)} />}
+
+      <Dialog open={!!selectedProduct} onOpenChange={(open) => { if (!open) setSelectedProduct(null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl">{selectedProduct?.name}</DialogTitle>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-4">
+              <div className="aspect-square grid place-items-center text-6xl bg-primary/5 rounded-xl overflow-hidden">
+                {selectedProduct.image ? (
+                  <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full object-contain p-3" />
+                ) : (
+                  <span>{selectedProduct.emoji}</span>
+                )}
+              </div>
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">
+                  <span className="font-bold text-foreground">{selectedProduct.brand}</span>
+                  {selectedProduct.flavor && <span> · {selectedProduct.flavor}</span>}
+                </div>
+                {selectedProduct.puffs && <div className="text-sm text-primary">{selectedProduct.puffs}</div>}
+                {selectedProduct.volume && <div className="text-sm text-primary">{selectedProduct.volume}</div>}
+                <div className="font-display text-2xl">{selectedProduct.price} <span className="text-sm text-muted-foreground">BYN</span></div>
+                {selectedProduct.description && (
+                  <div className="text-sm text-foreground whitespace-pre-line border-t border-border pt-3 mt-3">
+                    {selectedProduct.description}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -302,8 +326,8 @@ function Header({ onOpenCart }: { onOpenCart: () => void }) {
     <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-lg border-b border-border">
       <div className="px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/30 overflow-hidden grid place-items-center">
-            <img src={formatImageUrl(logoAsset.url) || ""} alt="LoveVape Logo" className="w-full h-full object-cover" />
+          <div className="h-11 flex items-center">
+            <LoveVapeLogo className="h-9 w-auto" />
           </div>
           <div className="leading-none">
             <div className="font-display text-2xl tracking-tight">
@@ -366,9 +390,10 @@ function Hero({ total }: { total: number }) {
   );
 }
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, onOpen }: { product: Product; onOpen: (p: Product) => void }) {
   const { add } = useCart();
   const out = !product.in_stock;
+  const [broken, setBroken] = useState(false);
   return (
     <div
       className={`relative rounded-2xl border border-border overflow-hidden flex flex-col transition-all ${out ? "opacity-50 grayscale" : "hover:border-primary/60 hover:-translate-y-0.5"}`}
@@ -381,11 +406,17 @@ function ProductCard({ product }: { product: Product }) {
       )}
       <div className="aspect-square grid place-items-center text-6xl bg-primary/5 border-b border-border/60 relative overflow-hidden">
         <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(circle at 50% 50%, var(--primary) 0%, transparent 60%)" }} />
-        {product.image ? (
-          <img src={product.image} alt={product.name} loading="lazy" className="relative w-full h-full object-contain p-2 sm:p-3" />
-        ) : (
-          <span className="drop-shadow-lg">{product.emoji}</span>
-        )}
+        <button
+          onClick={() => onOpen(product)}
+          className="relative w-full h-full flex items-center justify-center cursor-pointer"
+          aria-label={`Подробнее о ${product.name}`}
+        >
+          {product.image && !broken ? (
+            <img src={product.image} alt={product.name} loading="lazy" className="relative w-full h-full object-contain p-2 sm:p-3" onError={() => setBroken(true)} />
+          ) : (
+            <span className="drop-shadow-lg">{product.emoji}</span>
+          )}
+        </button>
       </div>
       <div className="p-3 flex-1 flex flex-col">
         <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{product.brand}</div>

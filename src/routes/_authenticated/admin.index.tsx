@@ -16,7 +16,6 @@ type ProductRow = {
   name: string;
   brand: string;
   category: "device" | "disposable" | "liquid" | "consumable" | string;
-  subcategory: string | null;
   price: number | string;
   flavor: string | null;
   puffs: string | null;
@@ -24,6 +23,7 @@ type ProductRow = {
   emoji: string;
   color: string;
   image_url: string | null;
+  description: string | null;
   in_stock: boolean;
   sort_order: number;
 };
@@ -34,7 +34,6 @@ type Draft = {
   name: string;
   brand: string;
   category: string;
-  subcategory: string;
   price: string;
   flavor: string;
   puffs: string;
@@ -42,6 +41,7 @@ type Draft = {
   emoji: string;
   color: "pink" | "cyan" | "lime";
   image_url: string;
+  description: string;
   in_stock: boolean;
   sort_order: string;
 };
@@ -51,7 +51,6 @@ const EMPTY: Draft = {
   name: "",
   brand: "",
   category: "disposable",
-  subcategory: "",
   price: "0",
   flavor: "",
   puffs: "",
@@ -59,6 +58,7 @@ const EMPTY: Draft = {
   emoji: "🔥",
   color: "pink",
   image_url: "",
+  description: "",
   in_stock: true,
   sort_order: "0",
 };
@@ -181,7 +181,6 @@ function ProductsAdmin() {
       name: row.name,
       brand: row.brand,
       category: row.category ?? "disposable",
-      subcategory: row.subcategory ?? "",
       price: String(row.price),
       flavor: row.flavor ?? "",
       puffs: row.puffs ?? "",
@@ -203,7 +202,6 @@ function ProductsAdmin() {
       name: draft.name.trim(),
       brand: draft.brand.trim(),
       category: draft.category,
-      subcategory: draft.subcategory || null,
       price: Number(draft.price) || 0,
       flavor: draft.flavor || null,
       puffs: draft.puffs || null,
@@ -237,7 +235,6 @@ function ProductsAdmin() {
           name: draft.name.trim(),
           brand: draft.brand.trim(),
           category: draft.category,
-          subcategory: draft.subcategory || null,
           price: Number(draft.price) || 0,
           flavor: draft.flavor,
           puffs: draft.puffs,
