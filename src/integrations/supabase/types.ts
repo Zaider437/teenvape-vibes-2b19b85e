@@ -96,6 +96,7 @@ export type Database = {
           puffs: string | null
           slug: string
           sort_order: number
+          subcategory: string | null
           updated_at: string
           volume: string | null
         }
@@ -114,6 +115,7 @@ export type Database = {
           puffs?: string | null
           slug: string
           sort_order?: number
+          subcategory?: string | null
           updated_at?: string
           volume?: string | null
         }
@@ -132,6 +134,7 @@ export type Database = {
           puffs?: string | null
           slug?: string
           sort_order?: number
+          subcategory?: string | null
           updated_at?: string
           volume?: string | null
         }

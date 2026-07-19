@@ -25,6 +25,7 @@ export type Product = {
   name: string;
   brand: string;
   category: "device" | "disposable" | "liquid" | "consumable" | "snus" | string;
+  subcategory?: string | null;
   price: number;
   flavor?: string | null;
   puffs?: string | null;
@@ -37,10 +38,10 @@ export type Product = {
 };
 
 export const PRODUCTS: Product[] = [
-  { id: "d1", slug: "d1", name: "Elf Bar BC5000", brand: "Elf Bar", category: "disposable", price: 22, flavor: "Голубика Лёд", puffs: "5000 затяжек", emoji: "💨", color: "cyan", in_stock: true, sort_order: 10 },
-  { id: "d2", slug: "d2", name: "Lost Mary OS5000", brand: "Lost Mary", category: "disposable", price: 24, flavor: "Клубника Киви", puffs: "5000 затяжек", emoji: "🍓", color: "pink", in_stock: true, sort_order: 20 },
-  { id: "d3", slug: "d3", name: "HQD Cuvie Plus", brand: "HQD", category: "disposable", price: 15, flavor: "Манго Айс", puffs: "1200 затяжек", emoji: "🥭", color: "lime", in_stock: true, sort_order: 30 },
-  { id: "d4", slug: "d4", name: "Waka SoPro 10000", brand: "Waka", category: "disposable", price: 32, flavor: "Арбуз Мята", puffs: "10000 затяжек", emoji: "🍉", color: "lime", in_stock: true, sort_order: 40 },
+  { id: "d1", slug: "d1", name: "Elf Bar BC5000", brand: "Elf Bar", category: "disposable", subcategory: "Elf Bar", price: 22, flavor: "Голубика Лёд", puffs: "5000 затяжек", emoji: "💨", color: "cyan", in_stock: true, sort_order: 10 },
+  { id: "d2", slug: "d2", name: "Lost Mary OS5000", brand: "Lost Mary", category: "disposable", subcategory: "Lost Mary", price: 24, flavor: "Клубника Киви", puffs: "5000 затяжек", emoji: "🍓", color: "pink", in_stock: true, sort_order: 20 },
+  { id: "d3", slug: "d3", name: "HQD Cuvie Plus", brand: "HQD", category: "disposable", subcategory: "HQD", price: 15, flavor: "Манго Айс", puffs: "1200 затяжек", emoji: "🥭", color: "lime", in_stock: true, sort_order: 30 },
+  { id: "d4", slug: "d4", name: "Waka SoPro 10000", brand: "Waka", category: "disposable", subcategory: "Waka", price: 32, flavor: "Арбуз Мята", puffs: "10000 затяжек", emoji: "🍉", color: "lime", in_stock: true, sort_order: 40 },
   { id: "v1-pink", slug: "v1-pink", name: "Vaporesso XROS Pro 2 — Pink", brand: "Vaporesso", category: "device", price: 90, flavor: "Pink", emoji: "⚡", color: "pink", image: xp2Pink.url, in_stock: true, sort_order: 110 },
   { id: "v1-green", slug: "v1-green", name: "Vaporesso XROS Pro 2 — Green", brand: "Vaporesso", category: "device", price: 90, flavor: "Green", emoji: "⚡", color: "lime", image: xp2Green.url, in_stock: true, sort_order: 111 },
   { id: "v1-lilac", slug: "v1-lilac", name: "Vaporesso XROS Pro 2 — Lilac", brand: "Vaporesso", category: "device", price: 90, flavor: "Lilac", emoji: "⚡", color: "pink", image: xp2Lilac.url, in_stock: true, sort_order: 112 },
@@ -59,10 +60,10 @@ export const PRODUCTS: Product[] = [
   { id: "v5-lilac", slug: "v5-lilac", name: "Vaporesso XROS 5 — Lilac", brand: "Vaporesso", category: "device", price: 65, flavor: "Lilac Textured", emoji: "⚡", color: "pink", image: x5Lilac.url, in_stock: true, sort_order: 151 },
   { id: "v5-mint", slug: "v5-mint", name: "Vaporesso XROS 5 — Mint", brand: "Vaporesso", category: "device", price: 65, flavor: "Mint", emoji: "⚡", color: "lime", image: x5Mint.url, in_stock: true, sort_order: 152 },
   { id: "v5-red", slug: "v5-red", name: "Vaporesso XROS 5 — Red", brand: "Vaporesso", category: "device", price: 65, flavor: "Red", emoji: "⚡", color: "pink", image: x5Red.url, in_stock: true, sort_order: 153 },
-  { id: "l1", slug: "l1", name: "Jam Monster — Blueberry", brand: "Jam Monster", category: "liquid", price: 18, flavor: "Черничный джем", volume: "30 мл / 20 мг", emoji: "🫐", color: "cyan", in_stock: true, sort_order: 210 },
-  { id: "l2", slug: "l2", name: "Husky Salt — Ice Cola", brand: "Husky", category: "liquid", price: 16, flavor: "Кола со льдом", volume: "30 мл / 20 мг", emoji: "🥤", color: "pink", in_stock: true, sort_order: 220 },
-  { id: "l3", slug: "l3", name: "Rell Salt — Watermelon", brand: "Rell", category: "liquid", price: 14, flavor: "Арбуз", volume: "30 мл / 20 мг", emoji: "🍉", color: "lime", in_stock: true, sort_order: 230 },
-  { id: "l4", slug: "l4", name: "Podonchik — Mango Peach", brand: "Podonchik", category: "liquid", price: 15, flavor: "Манго Персик", volume: "30 мл / 20 мг", emoji: "🍑", color: "pink", in_stock: true, sort_order: 240 },
+  { id: "l1", slug: "l1", name: "Jam Monster — Blueberry", brand: "Jam Monster", category: "liquid", subcategory: "Jam Monster", price: 18, flavor: "Черничный джем", volume: "30 мл / 20 мг", emoji: "🫐", color: "cyan", in_stock: true, sort_order: 210 },
+  { id: "l2", slug: "l2", name: "Husky Salt — Ice Cola", brand: "Husky", category: "liquid", subcategory: "Husky Salt", price: 16, flavor: "Кола со льдом", volume: "30 мл / 20 мг", emoji: "🥤", color: "pink", in_stock: true, sort_order: 220 },
+  { id: "l3", slug: "l3", name: "Rell Salt — Watermelon", brand: "Rell", category: "liquid", subcategory: "Rell Salt", price: 14, flavor: "Арбуз", volume: "30 мл / 20 мг", emoji: "🍉", color: "lime", in_stock: true, sort_order: 230 },
+  { id: "l4", slug: "l4", name: "Podonchik — Mango Peach", brand: "Podonchik", category: "liquid", subcategory: "Podonchik", price: 15, flavor: "Манго Персик", volume: "30 мл / 20 мг", emoji: "🍑", color: "pink", in_stock: true, sort_order: 240 },
   { id: "c2", slug: "c2", name: "Картридж SMOK Novo", brand: "SMOK", category: "consumable", price: 8, flavor: "Пустой картридж", volume: "2 мл / 1.0Ω", emoji: "🔧", color: "pink", in_stock: true, sort_order: 310 },
   { id: "c3", slug: "c3", name: "Испаритель GeekVape B", brand: "GeekVape", category: "consumable", price: 6, flavor: "Сменный испаритель", volume: "0.6Ω Mesh", emoji: "🌀", color: "lime", in_stock: true, sort_order: 320 },
   { id: "c4", slug: "c4", name: "Ватка Cotton Bacon", brand: "Wick'n'Vape", category: "consumable", price: 12, flavor: "Органический хлопок", volume: "10 полос", emoji: "☁️", color: "lime", in_stock: true, sort_order: 330 },
@@ -123,6 +124,7 @@ export async function fetchProducts(): Promise<Product[]> {
           name: p.name,
           brand: p.brand,
           category: p.category,
+          subcategory: p.subcategory,
           price: p.price,
           flavor: p.flavor,
           puffs: p.puffs,

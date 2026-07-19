@@ -27,6 +27,7 @@ export const Route = createFileRoute("/")({
 
 export function Shop() {
   const [category, setCategory] = useState<string>("all");
+  const [subcategory, setSubcategory] = useState<string>("all");
   const [brand, setBrand] = useState<string>("all");
   const [flavor, setFlavor] = useState<string>("all");
   const [cartOpen, setCartOpen] = useState(false);
@@ -79,6 +80,11 @@ export function Shop() {
     return Array.from(set).sort();
   }, [inCategory, hasSubfilters, brand]);
 
+  const subcategoryOptions = useMemo(() => {
+    if (!hasSubfilters) return [] as string[];
+    return Array.from(new Set(inCategory.map((p) => p.subcategory).filter(Boolean))).sort();
+  }, [inCategory, hasSubfilters]);
+
   const dynamicCategories = useMemo(() => {
     const uniqueCategories = Array.from(new Set(products.map((p) => p.category)));
     const CATEGORY_MAP: Record<string, { label: string; emoji: string }> = {
@@ -101,6 +107,7 @@ export function Shop() {
 
   function selectCategory(id: string) {
     setCategory(id);
+    setSubcategory("all");
     setBrand("all");
     setFlavor("all");
   }
@@ -108,16 +115,17 @@ export function Shop() {
   const filtered = useMemo(() => {
     let list = inCategory;
     if (hasSubfilters) {
+      if (subcategory !== "all") list = list.filter((p) => p.subcategory === subcategory);
       if (brand !== "all") list = list.filter((p) => p.brand === brand);
       if (flavor !== "all") list = list.filter((p) => p.flavor === flavor);
     }
     const q = query.trim().toLowerCase();
     if (!q) return list;
     return list.filter((p) => {
-      const hay = [p.name, p.brand, p.flavor, p.puffs, p.volume].filter(Boolean).join(" ").toLowerCase();
+      const hay = [p.name, p.brand, p.flavor, p.puffs, p.volume, p.subcategory].filter(Boolean).join(" ").toLowerCase();
       return hay.includes(q);
     });
-  }, [inCategory, hasSubfilters, brand, flavor, query]);
+  }, [inCategory, hasSubfilters, subcategory, brand, flavor, query]);
 
 
   return (
@@ -176,6 +184,14 @@ export function Shop() {
       {/* sub-filters for liquid / consumable */}
       {hasSubfilters && (
         <div className="px-4 mt-2 space-y-2">
+          {subcategoryOptions.length > 0 && (
+            <SubFilterRow
+              label="Подкатегория"
+              options={subcategoryOptions}
+              value={subcategory}
+              onChange={setSubcategory}
+            />
+          )}
           {brandOptions.length > 0 && (
             <SubFilterRow
               label="Производитель"
@@ -366,7 +382,7 @@ function ProductCard({ product }: { product: Product }) {
       <div className="aspect-square grid place-items-center text-6xl bg-primary/5 border-b border-border/60 relative overflow-hidden">
         <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(circle at 50% 50%, var(--primary) 0%, transparent 60%)" }} />
         {product.image ? (
-          <img src={product.image} alt={product.name} loading="lazy" className="relative w-full h-full object-contain p-4 sm:p-5" />
+          <img src={product.image} alt={product.name} loading="lazy" className="relative w-full h-full object-contain p-2 sm:p-3" />
         ) : (
           <span className="drop-shadow-lg">{product.emoji}</span>
         )}

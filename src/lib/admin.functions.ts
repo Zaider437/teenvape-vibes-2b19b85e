@@ -64,6 +64,7 @@ const productSchema = z.object({
   name: z.string().trim().min(1).max(1000),
   brand: z.string().trim().min(1).max(1000),
   category: z.string().trim().min(1).max(1000),
+  subcategory: z.string().trim().max(1000).optional().nullable(),
   price: z.number().nonnegative(),
   flavor: z.string().trim().max(1000).optional().nullable(),
   puffs: z.string().trim().max(1000).optional().nullable(),
@@ -103,6 +104,7 @@ export const adminUpsertProduct = createServerFn({ method: "POST" })
       flavor: data.flavor?.trim() || null,
       puffs: data.puffs?.trim() || null,
       volume: data.volume?.trim() || null,
+      subcategory: data.subcategory?.trim() || null,
       image_url: data.image_url?.trim() || null,
     };
 

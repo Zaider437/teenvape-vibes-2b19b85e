@@ -1,0 +1,94 @@
+npm notice run npx
+npm notice run wrangler dev --tunnel
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mOnce connected, this tunnel will be publicly accessible. Anyone who can reach it can:[0m
+
+  - Call ungated endpoints
+  - Trigger logic that uses remote bindings
+  - Reach internal services if your Worker proxies requests
+  
+  Consider using a named tunnel with Cloudflare Access to restrict access.
+  
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m[getTelegramLoginConfig] failed to get H3 event Error: No such module "_ssr/vinxi/http".[0m
+
+      at Object.serverFn (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/telegram-auth.functions-lkrGQ1bj.mjs:23:24)
+      at server (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:251:44)
+      at callNextMiddleware (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:179:26)
+      at callNextMiddleware (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:194:11)
+      at executeMiddleware (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:202:9)
+      at Object.assign.__executeServer (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:123:19)
+      at file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/telegram-auth.functions-lkrGQ1bj.mjs:19:37
+      at file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:310:19
+      at file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:318:6
+      at handleServerAction (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:456:4)
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m[getTelegramLoginConfig] failed to get H3 event Error: No such module "_ssr/vinxi/http".[0m
+
+      at Object.serverFn (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/telegram-auth.functions-lkrGQ1bj.mjs:23:24)
+      at server (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:251:44)
+      at callNextMiddleware (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:179:26)
+      at callNextMiddleware (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:194:11)
+      at executeMiddleware (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:202:9)
+      at Object.assign.__executeServer (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:123:19)
+      at file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/telegram-auth.functions-lkrGQ1bj.mjs:19:37
+      at file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:310:19
+      at file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:318:6
+      at handleServerAction (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:456:4)
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m[telegramLogin] failed to get H3 event Error: No such module "_ssr/vinxi/http".[0m
+
+      at Object.serverFn (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/telegram-auth.functions-lkrGQ1bj.mjs:52:24)
+      at async server (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:251:20)
+      at async callNextMiddleware (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:179:20)
+      at async Object.assign.__executeServer (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:123:13)
+      at async file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:317:12
+      at async file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:287:14
+      at async handleServerAction (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:285:9)
+      at async next (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:1114:13)
+      at async file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/start-DOSsnVpV.mjs:35:10
+      at async next (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:1114:13)
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m[tg-login] Telegram signature verification failed, but bypassing for development mode![0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m[createOrder] Supabase insert failed, using mock ID {[0m
+
+    code: 'PGRST205',
+    details: null,
+    hint: "Perhaps you meant the table 'public.products'",
+    message: "Could not find the table 'public.orders' in the schema cache"
+  }
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m[order] email send skipped: ReferenceError: inserted is not defined[0m
+
+      at Object.serverFn (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/orders.functions-COkWWqE6.mjs:106:47)
+      at async server (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:251:20)
+      at async callNextMiddleware (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:179:20)
+      at async Object.assign.__executeServer (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:123:13)
+      at async file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:317:12
+      at async file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:287:14
+      at async handleServerAction (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:285:9)
+      at async next (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:1114:13)
+      at async file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/start-DOSsnVpV.mjs:35:10
+      at async next (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:1114:13)
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m[order] telegram notification skipped: ReferenceError: inserted is not defined[0m
+
+      at Object.serverFn (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/orders.functions-COkWWqE6.mjs:149:13)
+      at async server (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:251:20)
+      at async callNextMiddleware (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:179:20)
+      at async Object.assign.__executeServer (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/createServerFn-CIHAFgYl.mjs:123:13)
+      at async file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:317:12
+      at async file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:287:14
+      at async handleServerAction (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:285:9)
+      at async next (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:1114:13)
+      at async file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/start-DOSsnVpV.mjs:35:10
+      at async next (file:///C:/Users/Lenovo/Downloads/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/teenvape-vibes-c6d2eb96-44cd13b30cf27d1a863e3eff340c5961f815f652/.output/server/_ssr/server-DfkqKa_D.mjs:1114:13)
+
+

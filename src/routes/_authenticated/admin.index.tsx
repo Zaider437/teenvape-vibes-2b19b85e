@@ -16,6 +16,7 @@ type ProductRow = {
   name: string;
   brand: string;
   category: "device" | "disposable" | "liquid" | "consumable" | string;
+  subcategory: string | null;
   price: number | string;
   flavor: string | null;
   puffs: string | null;
@@ -33,6 +34,7 @@ type Draft = {
   name: string;
   brand: string;
   category: string;
+  subcategory: string;
   price: string;
   flavor: string;
   puffs: string;
@@ -49,6 +51,7 @@ const EMPTY: Draft = {
   name: "",
   brand: "",
   category: "disposable",
+  subcategory: "",
   price: "0",
   flavor: "",
   puffs: "",
@@ -178,6 +181,7 @@ function ProductsAdmin() {
       name: row.name,
       brand: row.brand,
       category: row.category ?? "disposable",
+      subcategory: row.subcategory ?? "",
       price: String(row.price),
       flavor: row.flavor ?? "",
       puffs: row.puffs ?? "",
@@ -199,6 +203,7 @@ function ProductsAdmin() {
       name: draft.name.trim(),
       brand: draft.brand.trim(),
       category: draft.category,
+      subcategory: draft.subcategory || null,
       price: Number(draft.price) || 0,
       flavor: draft.flavor || null,
       puffs: draft.puffs || null,
@@ -232,6 +237,7 @@ function ProductsAdmin() {
           name: draft.name.trim(),
           brand: draft.brand.trim(),
           category: draft.category,
+          subcategory: draft.subcategory || null,
           price: Number(draft.price) || 0,
           flavor: draft.flavor,
           puffs: draft.puffs,
@@ -358,13 +364,13 @@ function ProductsAdmin() {
             <div key={row.id} className="bg-card border border-border rounded-xl p-3 flex items-center gap-3">
               <div className="w-12 h-12 rounded-lg bg-muted grid place-items-center text-2xl shrink-0 overflow-hidden">
                 {row.image_url ? (
-                  <img src={row.image_url} alt="" className="w-full h-full object-cover" />
+                  <img src={row.image_url} alt="" className="w-full h-full object-contain" />
                 ) : (
                   <span>{row.emoji}</span>
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{row.brand} · {row.category}</div>
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{row.brand} · {row.category} {row.subcategory ? `· ${row.subcategory}` : ""}</div>
                 <div className="font-bold text-sm leading-snug break-words">{row.name}</div>
                 <div className="text-xs text-muted-foreground break-words">
                   {row.flavor || row.volume || row.puffs || "—"}
@@ -457,6 +463,7 @@ function DraftEditor({
         <F label="Slug (уникальный)" v={draft.slug} on={(v) => set("slug", v)} />
         <F label="Название" v={draft.name} on={(v) => set("name", v)} />
         <F label="Бренд" v={draft.brand} on={(v) => set("brand", v)} />
+        <F label="Подкатегория (опционально)" v={draft.subcategory} on={(v) => set("subcategory", v)} />
         <label className="block">
           <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Категория</span>
           <select
