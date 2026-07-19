@@ -37,7 +37,7 @@ function AdminSettings() {
         getAnim()
       ]);
       setTimes(timesData);
-      
+
       if (animData) {
         setLeavesEnabled(animData.leaves.enabled);
         setLeavesFrom(animData.leaves.from);
@@ -123,7 +123,7 @@ function AdminSettings() {
           {/* Animation Settings Section */}
           <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
             <div className="text-sm font-bold uppercase tracking-widest text-primary">Настройки анимации эффектов</div>
-            
+
             {/* Leaves Animation */}
             <div className="space-y-3 border-b border-border/50 pb-4">
               <div className="flex items-center justify-between">
@@ -263,6 +263,7 @@ function AdminSettings() {
                 ))}
               </div>
             )}
+          </div>
           </div>
         </div>
       )}

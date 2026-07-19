@@ -20,6 +20,7 @@ expect.extend(matchers);
 // Mock the external modules
 vi.mock("../lib/products", () => ({
   fetchProducts: vi.fn(),
+  formatImageUrl: vi.fn((url) => url),
   CATEGORIES: [
     { id: "all", label: "Всё", emoji: "🔥" },
     { id: "disposable", label: "Одноразки", emoji: "💨" },
@@ -31,6 +32,7 @@ vi.mock("../lib/products", () => ({
 
 vi.mock("../lib/orders.functions", () => ({
   createOrder: vi.fn(),
+  debugEnv: vi.fn().mockResolvedValue({}),
 }));
 
 vi.mock("../integrations/supabase/client", () => ({
@@ -47,6 +49,14 @@ vi.mock("@tanstack/react-router", () => ({
 
 vi.mock("@tanstack/react-start", () => ({
   useServerFn: vi.fn(),
+  createMiddleware: vi.fn().mockReturnValue({
+    server: vi.fn().mockReturnValue(vi.fn()),
+  }),
+  createServerFn: vi.fn().mockReturnValue({
+    inputValidator: vi.fn().mockReturnThis(),
+    handler: vi.fn().mockReturnThis(),
+    middleware: vi.fn().mockReturnThis(),
+  }),
 }));
 
 vi.mock("sonner", () => ({
