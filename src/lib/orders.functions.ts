@@ -46,15 +46,23 @@ const orderSchema = z.object({
   origin: z.string().optional(),
 });
 
+interface ServerContext {
+  cloudflare?: {
+    env?: Record<string, string>;
+  };
+  env?: Record<string, string>;
+}
+
 export const createOrder = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => orderSchema.parse(input))
   .handler(async ({ data, context }) => {
-    console.log("[createOrder] context keys:", Object.keys(context || {}));
-    console.log("[createOrder] context.cloudflare keys:", Object.keys((context as any)?.cloudflare || {}));
-    console.log("[createOrder] context.env keys:", Object.keys((context as any)?.env || {}));
+    const ctx = context as ServerContext;
+    console.log("[createOrder] context keys:", Object.keys(ctx || {}));
+    console.log("[createOrder] context.cloudflare keys:", Object.keys(ctx?.cloudflare || {}));
+    console.log("[createOrder] context.env keys:", Object.keys(ctx?.env || {}));
     console.log("[createOrder] globalThis keys:", Object.keys(globalThis).filter(k => k.includes("TELEGRAM") || k.includes("env") || k.includes("process")));
-    
-    const env = (context as any)?.cloudflare?.env || (context as any)?.env || {};
+
+    const env = ctx?.cloudflare?.env || ctx?.env || {};
     const notifyEmail = env.NOTIFY_EMAIL || getEnv("NOTIFY_EMAIL") || "375333631370moroz@gmail.com";
     // SECURITY: never trust client-supplied prices. Recompute from the
     // authoritative product catalog and reject unknown items.
@@ -77,15 +85,38 @@ export const createOrder = createServerFn({ method: "POST" })
 
     const cancellationToken = crypto.randomUUID();
 
-    // We bypass Supabase insert since the database is empty/not configured,
-    // but we generate a mock order ID so the client gets a success screen,
-    // and we still send the Telegram and Email notifications!
-    const mockOrderId = crypto.randomUUID();
-    const inserted = { id: mockOrderId };
+    let mockOrderId = crypto.randomUUID();
+    let insertedId = mockOrderId;
+
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: inserted, error } = await supabaseAdmin
+        .from("orders" as any)
+        .insert({
+          cancellation_token: cancellationToken,
+          customer_name: data.customer_name,
+          customer_phone: data.customer_phone,
+          customer_address: data.customer_address,
+          customer_note: data.customer_note,
+          items: trustedItems as any,
+          total_amount: trustedTotal,
+          status: "new",
+        })
+        .select("id")
+        .single();
+
+      if (!error && inserted) {
+        insertedId = (inserted as any).id;
+      } else if (error) {
+        console.warn("[createOrder] Supabase insert failed, using mock ID", error);
+      }
+    } catch (err) {
+      console.warn("[createOrder] Supabase insert failed, using mock ID", err);
+    }
 
     // Save the order details in our in-memory cache so the cancellation page can load them!
     ordersCache.set(cancellationToken, {
-      id: inserted.id,
+      id: insertedId,
       customer_name: data.customer_name,
       customer_address: data.customer_address,
       customer_note: data.customer_note,
@@ -98,11 +129,11 @@ export const createOrder = createServerFn({ method: "POST" })
     // Build cancellation link from the current request origin.
     let cancelUrl: string | undefined;
     try {
-      let clientOrigin = data.origin || "https://9dlfgdrk-8087.euw.devtunnels.ms";
+      let clientOrigin = data.origin || "https://zaider437-teenvape-vibes-2b19b85e.workers.dev";
       // If the origin is local (localhost or 127.0.0.1), Telegram won't be able to access it.
       // We force the public dev tunnel URL so the link in Telegram works on any device.
       if (clientOrigin.includes("localhost") || clientOrigin.includes("127.0.0.1")) {
-        clientOrigin = "https://9dlfgdrk-8087.euw.devtunnels.ms";
+        clientOrigin = "https://zaider437-teenvape-vibes-2b19b85e.workers.dev";
       }
       cancelUrl = `${clientOrigin}/order-cancel?token=${cancellationToken}`;
     } catch (err) {
@@ -282,6 +313,30 @@ const tokenSchema = z.object({ token: z.string().uuid() });
 export const getOrderByToken = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => tokenSchema.parse(input))
   .handler(async ({ data }) => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: order, error } = await supabaseAdmin
+        .from("orders" as any)
+        .select("*")
+        .eq("cancellation_token", data.token)
+        .maybeSingle();
+
+      if (!error && order) {
+        return {
+          id: order.id,
+          customer_name: order.customer_name,
+          customer_address: order.customer_address,
+          customer_note: order.customer_note,
+          items: typeof order.items === "string" ? JSON.parse(order.items) : order.items,
+          total_amount: order.total_amount,
+          status: order.status,
+          created_at: order.created_at,
+        };
+      }
+    } catch (err) {
+      console.warn("[getOrderByToken] Failed to fetch from Supabase, falling back to cache", err);
+    }
+
     const order = ordersCache.get(data.token);
     if (order) {
       return {
@@ -295,7 +350,7 @@ export const getOrderByToken = createServerFn({ method: "GET" })
         created_at: order.created_at,
       };
     }
-    
+
     // Since we bypass Supabase, we return a mock order so the cancellation page loads successfully!
     return {
       id: "mock-order-id",
@@ -314,6 +369,25 @@ export const getOrderByToken = createServerFn({ method: "GET" })
 export const cancelOrder = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => tokenSchema.parse(input))
   .handler(async ({ data }) => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { error } = await supabaseAdmin
+        .from("orders" as any)
+        .update({ status: "cancelled" })
+        .eq("cancellation_token", data.token);
+
+      if (!error) {
+        const order = ordersCache.get(data.token);
+        if (order) {
+          order.status = "cancelled";
+          ordersCache.set(data.token, order);
+        }
+        return { success: true, alreadyCancelled: false };
+      }
+    } catch (err) {
+      console.warn("[cancelOrder] Failed to update Supabase, falling back to cache", err);
+    }
+
     const order = ordersCache.get(data.token);
     if (order) {
       order.status = "cancelled";

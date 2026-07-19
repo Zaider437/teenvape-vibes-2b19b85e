@@ -17,17 +17,21 @@ const Ctx = createContext<CartCtx | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     try {
       const raw = typeof window !== "undefined" ? localStorage.getItem("vh_cart") : null;
       if (raw) setItems(JSON.parse(raw));
     } catch {}
+    setIsLoaded(true);
   }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined") localStorage.setItem("vh_cart", JSON.stringify(items));
-  }, [items]);
+    if (isLoaded && typeof window !== "undefined") {
+      localStorage.setItem("vh_cart", JSON.stringify(items));
+    }
+  }, [items, isLoaded]);
 
   const value = useMemo<CartCtx>(() => ({
     items,

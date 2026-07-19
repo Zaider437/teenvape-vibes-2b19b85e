@@ -31,7 +31,7 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 
 function createSupabaseAdminClient() {
   const SUPABASE_URL = process.env.SUPABASE_URL || (globalThis as any).SUPABASE_URL || (globalThis as any).env?.SUPABASE_URL || (globalThis as any).__env__?.SUPABASE_URL || "https://ueazjqvxjlppgtkhcmut.supabase.co";
-  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || (globalThis as any).SUPABASE_SERVICE_ROLE_KEY || (globalThis as any).SUPABASE_SECRET_KEY || (globalThis as any).env?.SUPABASE_SERVICE_ROLE_KEY || (globalThis as any).env?.SUPABASE_SECRET_KEY || (globalThis as any).__env__?.SUPABASE_SERVICE_ROLE_KEY || (globalThis as any).__env__?.SUPABASE_SECRET_KEY || "sb_secret_LzJIRzi7EsB-b2bZaAtYUg_juFQG2YL";
+  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || (globalThis as any).SUPABASE_SERVICE_ROLE_KEY || (globalThis as any).SUPABASE_SECRET_KEY || (globalThis as any).env?.SUPABASE_SERVICE_ROLE_KEY || (globalThis as any).env?.SUPABASE_SECRET_KEY || (globalThis as any).__env__?.SUPABASE_SERVICE_ROLE_KEY || (globalThis as any).__env__?.SUPABASE_SECRET_KEY;
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     const missing = [

@@ -7,6 +7,7 @@ import { CATEGORIES, fetchProducts, formatImageUrl, type Product } from "../lib/
 import { createOrder, debugEnv } from "../lib/orders.functions";
 import logoAsset from "../assets/lovevape-logo.jpg.asset.json";
 import { toast, Toaster } from "sonner";
+import { FallingEffects } from "../components/FallingEffects";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/")({
   }),
   component: () => (
     <CartProvider>
+      <FallingEffects />
       <Shop />
       <Toaster position="top-center" theme="dark" richColors />
     </CartProvider>
@@ -622,4 +624,5 @@ function Footer() {
     </footer>
   );
 }
+
 

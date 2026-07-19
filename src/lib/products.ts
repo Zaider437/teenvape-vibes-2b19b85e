@@ -97,7 +97,7 @@ export async function fetchProducts(): Promise<Product[]> {
         .from("products" as any)
         .select("*")
         .order("sort_order", { ascending: true });
-      
+
       if (error) throw error;
       if (data && data.length > 0) {
         return data.map((p: any) => ({
@@ -117,6 +117,7 @@ export async function fetchProducts(): Promise<Product[]> {
           sort_order: p.sort_order,
         }));
       }
+      return PRODUCTS.map(p => ({ ...p, image: formatImageUrl(p.image) }));
     } catch (err) {
       console.warn("[products] Failed to fetch from Supabase, falling back to local PRODUCTS", err);
     }
@@ -141,7 +142,7 @@ export async function fetchMeetingTimes(): Promise<string[]> {
       .select("note")
       .eq("telegram_username", "__meeting_times__")
       .maybeSingle() as any);
-    
+
     if (!error && data && data.note) {
       return JSON.parse(data.note) as string[];
     }

@@ -263,3 +263,64 @@ export const adminUpdateMeetingTimes = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
+export const getAnimationSettings = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await (supabaseAdmin
+      .from("admin_telegram_users" as any)
+      .select("note")
+      .eq("telegram_username", "__animation_settings__")
+      .maybeSingle() as any);
+    if (error) {
+      console.error("Failed to fetch animation settings:", error);
+    }
+    if (data && data.note) {
+      try {
+        return JSON.parse(data.note) as {
+          leaves: { enabled: boolean; from: number; to: number };
+          snow: { enabled: boolean; from: number; to: number };
+        };
+      } catch (e) {
+        console.error("Failed to parse animation settings:", e);
+      }
+    }
+    return {
+      leaves: { enabled: true, from: 9, to: 11 },
+      snow: { enabled: true, from: 12, to: 2 }
+    };
+  });
+
+export const adminUpdateAnimationSettings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({
+    leaves: z.object({ enabled: z.boolean(), from: z.number().min(1).max(12), to: z.number().min(1).max(12) }),
+    snow: z.object({ enabled: z.boolean(), from: z.number().min(1).max(12), to: z.number().min(1).max(12) })
+  }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    
+    const { data: existing } = await (context.supabase
+      .from("admin_telegram_users" as any)
+      .select("id")
+      .eq("telegram_username", "__animation_settings__")
+      .maybeSingle() as any);
+
+    if (existing) {
+      const { error } = await context.supabase
+        .from("admin_telegram_users" as any)
+        .update({ note: JSON.stringify(data) })
+        .eq("telegram_username", "__animation_settings__");
+      if (error) throw error;
+    } else {
+      const { error } = await context.supabase
+        .from("admin_telegram_users" as any)
+        .insert({
+          telegram_username: "__animation_settings__",
+          note: JSON.stringify(data),
+        });
+      if (error) throw error;
+    }
+    return { ok: true };
+  });
+

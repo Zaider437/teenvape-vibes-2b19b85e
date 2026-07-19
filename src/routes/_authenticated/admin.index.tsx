@@ -64,6 +64,18 @@ export const Route = createFileRoute("/_authenticated/admin/")({
   component: ProductsAdmin,
 });
 
+const CATEGORY_MAP: Record<string, string> = {
+  disposable: "Одноразки",
+  device: "Устройства",
+  liquid: "Жидкости",
+  consumable: "Расходники",
+  snus: "Снюс",
+};
+
+function getCategoryLabel(id: string): string {
+  return CATEGORY_MAP[id] || (id.charAt(0).toUpperCase() + id.slice(1));
+}
+
 function ProductsAdmin() {
   const list = useServerFn(adminListProducts);
   const upsert = useServerFn(adminUpsertProduct);
@@ -81,21 +93,10 @@ function ProductsAdmin() {
 
   const dynamicCategories = useMemo(() => {
     const uniqueCategories = Array.from(new Set(rows.map((r) => r.category)));
-    const CATEGORY_MAP: Record<string, { label: string }> = {
-      disposable: { label: "Одноразки" },
-      device: { label: "Устройства" },
-      liquid: { label: "Жидкости" },
-      consumable: { label: "Расходники" },
-      snus: { label: "Снюс" },
-    };
-    const list = uniqueCategories.map((id) => {
-      const mapped = CATEGORY_MAP[id];
-      if (mapped) {
-        return { id, label: mapped.label };
-      }
-      const label = id.charAt(0).toUpperCase() + id.slice(1);
-      return { id, label };
-    });
+    const list = uniqueCategories.map((id) => ({
+      id,
+      label: getCategoryLabel(id),
+    }));
     return [{ id: "all", label: "Все" }, ...list];
   }, [rows]);
 
@@ -252,10 +253,10 @@ function ProductsAdmin() {
 
   async function del(row: ProductRow) {
     if (!confirm(`Удалить «${row.name}»?`)) return;
-    
+
     // Optimistically remove from local state instantly
     setRows((prev) => prev.filter((r) => r.id !== row.id));
-    
+
     try {
       await remove({ data: { id: row.id } });
       toast.success("Удалено");
@@ -268,10 +269,10 @@ function ProductsAdmin() {
 
   async function flipStock(row: ProductRow) {
     const nextInStock = !row.in_stock;
-    
+
     // Optimistically update local state instantly
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, in_stock: nextInStock } : r)));
-    
+
     try {
       await toggle({ data: { id: row.id, in_stock: nextInStock } });
     } catch (e: any) {
