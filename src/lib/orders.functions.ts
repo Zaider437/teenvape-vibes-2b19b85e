@@ -6,25 +6,60 @@ const ordersCache = new Map<string, any>();
 
 function getEnv(key: string): string | undefined {
   if (key === "TELEGRAM_API_KEY") {
-    return process.env.TELEGRAM_API_KEY || (globalThis as any).TELEGRAM_API_KEY || (globalThis as any).env?.TELEGRAM_API_KEY || (globalThis as any).__env__?.TELEGRAM_API_KEY;
+    return (
+      process.env.TELEGRAM_API_KEY ||
+      (globalThis as any).TELEGRAM_API_KEY ||
+      (globalThis as any).env?.TELEGRAM_API_KEY ||
+      (globalThis as any).__env__?.TELEGRAM_API_KEY
+    );
   }
   if (key === "TELEGRAM_CHAT_ID") {
-    return process.env.TELEGRAM_CHAT_ID || (globalThis as any).TELEGRAM_CHAT_ID || (globalThis as any).env?.TELEGRAM_CHAT_ID || (globalThis as any).__env__?.TELEGRAM_CHAT_ID;
+    return (
+      process.env.TELEGRAM_CHAT_ID ||
+      (globalThis as any).TELEGRAM_CHAT_ID ||
+      (globalThis as any).env?.TELEGRAM_CHAT_ID ||
+      (globalThis as any).__env__?.TELEGRAM_CHAT_ID
+    );
   }
   if (key === "SMTP_HOST") {
-    return process.env.SMTP_HOST || (globalThis as any).SMTP_HOST || (globalThis as any).env?.SMTP_HOST || (globalThis as any).__env__?.SMTP_HOST;
+    return (
+      process.env.SMTP_HOST ||
+      (globalThis as any).SMTP_HOST ||
+      (globalThis as any).env?.SMTP_HOST ||
+      (globalThis as any).__env__?.SMTP_HOST
+    );
   }
   if (key === "SMTP_PORT") {
-    return process.env.SMTP_PORT || (globalThis as any).SMTP_PORT || (globalThis as any).env?.SMTP_PORT || (globalThis as any).__env__?.SMTP_PORT;
+    return (
+      process.env.SMTP_PORT ||
+      (globalThis as any).SMTP_PORT ||
+      (globalThis as any).env?.SMTP_PORT ||
+      (globalThis as any).__env__?.SMTP_PORT
+    );
   }
   if (key === "SMTP_USER") {
-    return process.env.SMTP_USER || (globalThis as any).SMTP_USER || (globalThis as any).env?.SMTP_USER || (globalThis as any).__env__?.SMTP_USER;
+    return (
+      process.env.SMTP_USER ||
+      (globalThis as any).SMTP_USER ||
+      (globalThis as any).env?.SMTP_USER ||
+      (globalThis as any).__env__?.SMTP_USER
+    );
   }
   if (key === "SMTP_PASS") {
-    return process.env.SMTP_PASS || (globalThis as any).SMTP_PASS || (globalThis as any).env?.SMTP_PASS || (globalThis as any).__env__?.SMTP_PASS;
+    return (
+      process.env.SMTP_PASS ||
+      (globalThis as any).SMTP_PASS ||
+      (globalThis as any).env?.SMTP_PASS ||
+      (globalThis as any).__env__?.SMTP_PASS
+    );
   }
   if (key === "NOTIFY_EMAIL") {
-    return process.env.NOTIFY_EMAIL || (globalThis as any).NOTIFY_EMAIL || (globalThis as any).env?.NOTIFY_EMAIL || (globalThis as any).__env__?.NOTIFY_EMAIL;
+    return (
+      process.env.NOTIFY_EMAIL ||
+      (globalThis as any).NOTIFY_EMAIL ||
+      (globalThis as any).env?.NOTIFY_EMAIL ||
+      (globalThis as any).__env__?.NOTIFY_EMAIL
+    );
   }
   return undefined;
 }
@@ -60,7 +95,12 @@ export const createOrder = createServerFn({ method: "POST" })
     console.log("[createOrder] context keys:", Object.keys(ctx || {}));
     console.log("[createOrder] context.cloudflare keys:", Object.keys(ctx?.cloudflare || {}));
     console.log("[createOrder] context.env keys:", Object.keys(ctx?.env || {}));
-    console.log("[createOrder] globalThis keys:", Object.keys(globalThis).filter(k => k.includes("TELEGRAM") || k.includes("env") || k.includes("process")));
+    console.log(
+      "[createOrder] globalThis keys:",
+      Object.keys(globalThis).filter(
+        (k) => k.includes("TELEGRAM") || k.includes("env") || k.includes("process"),
+      ),
+    );
 
     const env = ctx?.cloudflare?.env || ctx?.env || {};
     const notifyEmail = env.NOTIFY_EMAIL || getEnv("NOTIFY_EMAIL") || "375333631370moroz@gmail.com";
@@ -73,11 +113,17 @@ export const createOrder = createServerFn({ method: "POST" })
     const trustedItems = data.items.map((i) => {
       const product = byId.get(i.id);
       if (!product) {
-        // Fallback gracefully to client-supplied data instead of crashing the order!
         console.warn(`[order] Product not found in catalog: ${i.id}. Using client-supplied data.`);
-        return { id: i.id, name: i.name, price: i.price, qty: i.qty };
+        return { id: i.id, name: i.name, price: i.price, qty: i.qty, flavor: null, image: null };
       }
-      return { id: product.id, name: product.name, price: product.price, qty: i.qty };
+      return {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        qty: i.qty,
+        flavor: product.flavor || null,
+        image: product.image || null,
+      };
     });
     const trustedTotal = Number(
       trustedItems.reduce((sum, i) => sum + i.price * i.qty, 0).toFixed(2),
@@ -145,7 +191,12 @@ export const createOrder = createServerFn({ method: "POST" })
     try {
       const subject = `🔥 Новый заказ LoveVape #${insertedId.slice(0, 8)}`;
       const itemsHtml = trustedItems
-        .map((i) => `<tr><td style="padding:6px 8px">${i.name}</td><td style="padding:6px 8px;text-align:center">${i.qty}</td><td style="padding:6px 8px;text-align:right">${(i.price * i.qty).toFixed(2)} BYN</td></tr>`)
+        .map((i) => {
+          const flavorText = i.flavor
+            ? `<br/><small style="color:#666">${escapeHtml(i.flavor)}</small>`
+            : "";
+          return `<tr><td style="padding:6px 8px">${escapeHtml(i.name)}${flavorText}</td><td style="padding:6px 8px;text-align:center">${i.qty}</td><td style="padding:6px 8px;text-align:right">${(i.price * i.qty).toFixed(2)} BYN</td></tr>`;
+        })
         .join("");
       const html = `
         <div style="font-family:Arial,sans-serif;color:#111">
@@ -187,7 +238,7 @@ export const createOrder = createServerFn({ method: "POST" })
         });
 
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("SMTP timeout")), 6000)
+          setTimeout(() => reject(new Error("SMTP timeout")), 6000),
         );
 
         await Promise.race([sendPromise, timeoutPromise]);
@@ -210,6 +261,7 @@ export const createOrder = createServerFn({ method: "POST" })
         items: trustedItems,
         total: trustedTotal,
         cancelUrl,
+        origin: clientOrigin,
         env,
       });
     } catch (err) {
@@ -226,24 +278,45 @@ async function sendTelegramNotification(params: {
   customerPhone: string;
   customerAddress: string;
   customerNote?: string | null;
-  items: Array<{ name: string; qty: number; price: number }>;
+  items: Array<{
+    name: string;
+    qty: number;
+    price: number;
+    flavor?: string | null;
+    image?: string | null;
+  }>;
   total: number;
   cancelUrl?: string;
+  origin?: string;
   env?: any;
 }) {
-  const tgKey = params.env?.TELEGRAM_API_KEY || getEnv("TELEGRAM_API_KEY") || "8777027201:AAFD8QYw5ita5wIzYFRJTS4LH75DF6eU1jo";
-  const chatId = (params.env?.TELEGRAM_CHAT_ID || getEnv("TELEGRAM_CHAT_ID") || "-1004456309860")?.trim();
+  const tgKey =
+    params.env?.TELEGRAM_API_KEY ||
+    getEnv("TELEGRAM_API_KEY") ||
+    "8777027201:AAFD8QYw5ita5wIzYFRJTS4LH75DF6eU1jo";
+  const chatId = (
+    params.env?.TELEGRAM_CHAT_ID ||
+    getEnv("TELEGRAM_CHAT_ID") ||
+    "-1004456309860"
+  )?.trim();
   if (!tgKey || !chatId) {
-    console.warn("[order] telegram notification skipped: missing tgKey or chatId", { tgKey: !!tgKey, chatId: !!chatId });
+    console.warn("[order] telegram notification skipped: missing tgKey or chatId", {
+      tgKey: !!tgKey,
+      chatId: !!chatId,
+    });
     return false;
   }
 
-  const note = params.customerNote && params.customerNote.trim() ? params.customerNote : "... не определен ...";
+  const note =
+    params.customerNote && params.customerNote.trim()
+      ? params.customerNote
+      : "... не определен ...";
+  const origin = params.origin || "https://zaider437-teenvape-vibes-2b19b85e.workers.dev";
 
   const itemsHtml = params.items
     .map(
       (i) =>
-        `• Товар: ${escapeHtml(i.name)}; ${i.qty} шт. по ${i.price.toFixed(2)} BYN — ${(i.price * i.qty).toFixed(2)} BYN`,
+        `• Товар: ${escapeHtml(i.name)}${i.flavor ? ` (${escapeHtml(i.flavor)})` : ""}; ${i.qty} шт. по ${i.price.toFixed(2)} BYN — ${(i.price * i.qty).toFixed(2)} BYN`,
     )
     .join("\n");
 
@@ -260,46 +333,83 @@ async function sendTelegramNotification(params: {
   ];
 
   if (params.cancelUrl) {
-    lines.push(
-      ``,
-      `🔗 Ссылка для отмены заказа:`,
-      params.cancelUrl,
-    );
+    lines.push(``, `🔗 Ссылка для отмены заказа:`, params.cancelUrl);
   }
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3500);
+  const media = params.items
+    .filter((i) => i.image)
+    .map((i) => {
+      let imageUrl = i.image!;
+      if (!imageUrl.startsWith("http")) {
+        imageUrl = `${origin}${imageUrl}`;
+      }
+      const caption = `<b>${escapeHtml(i.name)}</b>\n${i.flavor ? `Вкус: ${escapeHtml(i.flavor)}\n` : ""}${i.qty} шт. × ${i.price.toFixed(2)} BYN = ${(i.price * i.qty).toFixed(2)} BYN`;
+      return {
+        type: "photo" as const,
+        media: imageUrl,
+        caption,
+        parse_mode: "HTML" as const,
+      };
+    })
+    .slice(0, 10);
 
   try {
-    const res = await fetch(
-      `https://api.telegram.org/bot${tgKey}/sendMessage`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: lines.join("\n"),
-          parse_mode: "HTML",
-        }),
-        signal: controller.signal,
+    if (media.length > 0) {
+      const mediaController = new AbortController();
+      const mediaTimeout = setTimeout(() => mediaController.abort(), 6000);
+      try {
+        const mediaRes = await fetch(`https://api.telegram.org/bot${tgKey}/sendMediaGroup`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id: chatId,
+            media: media,
+          }),
+          signal: mediaController.signal,
+        });
+        clearTimeout(mediaTimeout);
+        if (!mediaRes.ok) {
+          console.warn(
+            "[order] telegram media group failed",
+            mediaRes.status,
+            await mediaRes.text(),
+          );
+        }
+      } catch (err) {
+        clearTimeout(mediaTimeout);
+        console.warn("[order] telegram media group error:", err);
+      }
+    }
+
+    const textController = new AbortController();
+    const textTimeout = setTimeout(() => textController.abort(), 8000);
+    const textRes = await fetch(`https://api.telegram.org/bot${tgKey}/sendMessage`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
-    clearTimeout(timeoutId);
-    if (!res.ok) {
-      console.warn("[order] telegram send failed", res.status, await res.text());
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: lines.join("\n"),
+        parse_mode: "HTML",
+      }),
+      signal: textController.signal,
+    });
+    clearTimeout(textTimeout);
+    if (!textRes.ok) {
+      console.warn("[order] telegram send failed", textRes.status, await textRes.text());
       return false;
     }
     return true;
   } catch (err) {
-    clearTimeout(timeoutId);
     console.warn("[order] telegram fetch failed or timed out", err);
     return false;
   }
 }
 
-function escapeHtml(s: string) {
+export function escapeHtml(s: string) {
   return s
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -357,10 +467,8 @@ export const getOrderByToken = createServerFn({ method: "GET" })
       customer_name: "@telegram_user",
       customer_address: "18:00",
       customer_note: "Сдача не нужна",
-      items: [
-        { name: "Тестовый товар", qty: 1, price: 15.00 }
-      ],
-      total_amount: 15.00,
+      items: [{ name: "Тестовый товар", qty: 1, price: 15.0 }],
+      total_amount: 15.0,
       status: "new",
       created_at: new Date().toISOString(),
     };
@@ -404,7 +512,13 @@ export const debugEnv = createServerFn({ method: "GET" }).handler(async ({ conte
     cloudflareEnvKeys: Object.keys((context as any)?.cloudflare?.env || {}),
     envKeys: Object.keys((context as any)?.env || {}),
     processEnvKeys: Object.keys(process.env || {}),
-    globalThisKeys: Object.keys(globalThis).filter(k => k.includes("TELEGRAM") || k.includes("env") || k.includes("process") || k.includes("SUPABASE")),
+    globalThisKeys: Object.keys(globalThis).filter(
+      (k) =>
+        k.includes("TELEGRAM") ||
+        k.includes("env") ||
+        k.includes("process") ||
+        k.includes("SUPABASE"),
+    ),
     globalThisEnvKeys: Object.keys((globalThis as any).env || {}),
   };
   return keys;

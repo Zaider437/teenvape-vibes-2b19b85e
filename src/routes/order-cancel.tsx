@@ -25,7 +25,7 @@ export const Route = createFileRoute("/order-cancel")({
   component: OrderCancelPage,
 });
 
-function OrderCancelPage() {
+export function OrderCancelPage() {
   const { token } = useSearch({ from: "/order-cancel" });
   const fetchOrder = useServerFn(getOrderByToken);
   const doCancel = useServerFn(cancelOrder);
