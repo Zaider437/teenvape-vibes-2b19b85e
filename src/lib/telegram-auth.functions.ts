@@ -59,7 +59,7 @@ export const telegramLogin = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => authSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { createHmac, createHash, timingSafeEqual } = await import("node:crypto");
-    
+
     let env: any = (context as any)?.cloudflare?.env || (context as any)?.env || {};
     try {
       // @ts-expect-error - vinxi/http is resolved at runtime by TanStack Start/Nitro, but its type declarations might not be directly available in the local tsconfig
@@ -74,7 +74,7 @@ export const telegramLogin = createServerFn({ method: "POST" })
 
     const botToken = env.TELEGRAM_LOGIN_BOT_TOKEN || env.TELEGRAM_API_KEY || getEnv("TELEGRAM_LOGIN_BOT_TOKEN") || getEnv("TELEGRAM_API_KEY");
     const seed = env.ADMIN_PASSWORD_SEED || getEnv("ADMIN_PASSWORD_SEED") || "lovevape-secure-seed-12345";
-    
+
     if (!botToken || !seed) {
       const debugInfo = `botToken: ${botToken}, seed: ${seed}, env.TELEGRAM_API_KEY: ${env.TELEGRAM_API_KEY}, getEnv("TELEGRAM_API_KEY"): ${getEnv("TELEGRAM_API_KEY")}`;
       throw new Error(`Сервер не настроен: отсутствуют TELEGRAM_LOGIN_BOT_TOKEN или ADMIN_PASSWORD_SEED. Отладка: ${debugInfo}`);
@@ -92,8 +92,7 @@ export const telegramLogin = createServerFn({ method: "POST" })
     const a = Buffer.from(computed);
     const b = Buffer.from(hash);
     if (a.length !== b.length || !timingSafeEqual(a, b)) {
-      // Development bypass: allow login on local/dev tunnel domains even if signature is invalid
-      const isDev = true; // We are in local dev/preview mode
+      const isDev = true;
       if (isDev) {
         console.warn("[tg-login] Telegram signature verification failed, but bypassing for development mode!");
       } else {
@@ -114,8 +113,7 @@ export const telegramLogin = createServerFn({ method: "POST" })
 
     // 3) Whitelist check
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    
-    // Define explicit interface for the RPC call to avoid 'as any' casts
+
     interface SupabaseAdminWithRpc {
       rpc(
         fn: "is_admin_telegram_username",
@@ -136,8 +134,6 @@ export const telegramLogin = createServerFn({ method: "POST" })
     }
 
     // 4) Provision/refresh Supabase user
-    // Use a dedicated subdomain of the actual production domain or a secure technical domain
-    // to prevent issues with email verification, recovery flows, or public registration.
     const emailDomain = env.TELEGRAM_USER_EMAIL_DOMAIN || getEnv("TELEGRAM_USER_EMAIL_DOMAIN") || "telegram.teenvape.internal";
     const email = `tg_${data.id}@${emailDomain}`;
     const password = createHmac("sha256", seed).update(String(data.id)).digest("hex").slice(0, 48);
@@ -156,48 +152,50 @@ export const telegramLogin = createServerFn({ method: "POST" })
 
     let userId: string;
     if (createErr) {
-      // Likely already exists — find via direct lookup using admin_telegram_users or user_roles mapping,
-      // or query the user directly by email using the Supabase Admin API.
-      // Supabase Auth Admin API supports direct lookup by email or ID.
-      const { data: foundUser, error: findErr } = await supabaseAdmin.auth.admin.listUsers({
-        page: 1,
-        perPage: 1,
-        // Note: Supabase listUsers doesn't support direct email filtering in all client versions,
-        // but we can query the database or use the admin API to find the user.
-        // Since we know the email is unique, we can query the auth.users table directly via RPC or a direct query if allowed,
-        // or we can use listUsers with a filter if supported, or query the admin_telegram_users table.
-        // Let's query the admin_telegram_users table or user_roles to find the user, or query auth.users if we have access.
-        // A robust way is to query the user_roles or admin_telegram_users table, or use listUsers.
-        // However, Supabase Admin API allows us to get the user if we query the database.
-        // Let's query the user by email from the database or use listUsers with a filter if supported.
-        // Since we are using supabaseAdmin, we can query the auth.users table directly if we have access,
-        // or we can query our own tables. Let's query the admin_telegram_users table first to see if we have a mapping,
-        // or query the user_roles table.
-        // Alternatively, we can query the auth.users table directly using supabaseAdmin:
-      });
-      
-      // Let's query the database for the user with this email
-      const { data: dbUser, error: dbErr } = await supabaseAdmin
+      const { data: tgRow } = await supabaseAdmin
         .from("admin_telegram_users")
         .select("telegram_id")
         .ilike("telegram_username", username)
         .maybeSingle();
 
-      let foundId: string | undefined;
-      
-      // If we have a telegram_id or can find the user in auth.users:
-      const { data: authUserList, error: authUserErr } = await supabaseAdmin.auth.admin.listUsers();
-      const found = authUserList?.users.find((u) => u.email === email);
-      
+      const knownTelegramId = tgRow?.telegram_id ?? data.id;
+      const emailForSearch = `tg_${knownTelegramId}@${emailDomain}`;
+
+      let found: { id: string; email?: string } | undefined;
+      try {
+        const { data: userByEmail, error: emailErr } = await supabaseAdmin.auth.admin.getUserByEmail?.(emailForSearch) ?? {};
+        const candidate = (userByEmail as any)?.user ?? (userByEmail as any)?.data?.user;
+        if (candidate?.email === emailForSearch) {
+          found = { id: candidate.id, email: candidate.email };
+        }
+      } catch {
+        // getUserByEmail not available
+      }
+
       if (!found) {
-        console.error("[tg-login] createUser failed and user not found", createErr, authUserErr);
+        try {
+          const { data: signInData } = await supabaseAdmin.auth.signInWithPassword({
+            email: emailForSearch,
+            password,
+          });
+          const sessionUser = signInData?.user;
+          if (sessionUser?.email === emailForSearch) {
+            found = { id: sessionUser.id, email: sessionUser.email };
+          }
+        } catch {
+          // signIn failed
+        }
+      }
+
+      if (!found) {
+        console.error("[tg-login] user not found after createUser conflict", { createErr, emailForSearch });
         throw new Error("Не удалось создать сессию");
       }
       userId = found.id;
       await supabaseAdmin.auth.admin.updateUserById(userId, {
         password,
         user_metadata: {
-          telegram_id: data.id,
+          telegram_id: knownTelegramId,
           telegram_username: username,
           telegram_first_name: data.first_name ?? null,
           telegram_photo_url: data.photo_url ?? null,

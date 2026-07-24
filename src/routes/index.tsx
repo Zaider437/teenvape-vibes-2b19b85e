@@ -52,9 +52,6 @@ export function Shop() {
   const [loadingProducts, setLoadingProducts] = useState(true);
 
   useEffect(() => {
-    debugEnv()
-      .then((keys) => console.log("[DEBUG ENV KEYS STRING]:", JSON.stringify(keys)))
-      .catch((err) => console.error("[DEBUG ENV FAILED]:", err));
     let cancelled = false;
     fetchProducts()
       .then((data) => {
@@ -265,9 +262,9 @@ export function Shop() {
           if (!open) setSelectedProduct(null);
         }}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-sm sm:max-w-md max-h-[85vh] overflow-y-auto p-4 sm:p-5 gap-3">
           <DialogHeader>
-            <DialogTitle className="font-display text-xl">{selectedProduct?.name}</DialogTitle>
+            <DialogTitle className="font-display text-lg pr-8">{selectedProduct?.name}</DialogTitle>
           </DialogHeader>
           {selectedProduct && <ProductDetail product={selectedProduct} />}
         </DialogContent>
@@ -425,6 +422,7 @@ function ProductCard({ product, onOpen }: { product: Product; onOpen: (p: Produc
               src={product.image}
               alt={product.name}
               loading="lazy"
+              decoding="async"
               className="relative w-full h-full object-contain p-1.5 sm:p-2.5"
               onError={() => setBroken(true)}
             />
@@ -498,31 +496,32 @@ function ProductDetail({ product }: { product: Product }) {
   const out = !product.in_stock;
   const [broken, setBroken] = useState(false);
   return (
-    <div className="space-y-3 sm:space-y-4">
-      <div className="aspect-[4/5] sm:aspect-[3/4] grid place-items-center text-5xl sm:text-6xl bg-primary/5 rounded-xl overflow-hidden">
+    <div className="space-y-2 sm:space-y-3">
+      <div className="aspect-[4/3] sm:aspect-[3/4] grid place-items-center text-4xl sm:text-5xl bg-primary/5 rounded-lg overflow-hidden">
         {product.image && !broken ? (
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-contain p-2 sm:p-3"
+            decoding="async"
+            className="w-full h-full object-contain p-1.5 sm:p-2"
             onError={() => setBroken(true)}
           />
         ) : (
           <span>{product.emoji}</span>
         )}
       </div>
-      <div className="space-y-1.5 sm:space-y-2">
-        <div className="text-sm text-muted-foreground">
+      <div className="space-y-1 sm:space-y-1.5">
+        <div className="text-xs sm:text-sm text-muted-foreground">
           <span className="font-bold text-foreground">{product.brand}</span>
           {product.flavor && <span> · {product.flavor}</span>}
         </div>
-        {product.puffs && <div className="text-sm text-primary">{product.puffs}</div>}
-        {product.volume && <div className="text-sm text-primary">{product.volume}</div>}
-        <div className="font-display text-xl sm:text-2xl">
-          {product.price} <span className="text-sm text-muted-foreground">BYN</span>
+        {product.puffs && <div className="text-xs sm:text-sm text-primary">{product.puffs}</div>}
+        {product.volume && <div className="text-xs sm:text-sm text-primary">{product.volume}</div>}
+        <div className="font-display text-lg sm:text-xl">
+          {product.price} <span className="text-xs sm:text-sm text-muted-foreground">BYN</span>
         </div>
         {product.description && (
-          <div className="text-sm text-foreground whitespace-pre-line border-t border-border pt-2 sm:pt-3 mt-2 sm:mt-3">
+          <div className="text-xs sm:text-sm text-foreground whitespace-pre-line border-t border-border pt-1.5 sm:pt-2 mt-1.5 sm:mt-2">
             {product.description}
           </div>
         )}
@@ -533,7 +532,7 @@ function ProductDetail({ product }: { product: Product }) {
             toast.success(`${product.name} в корзине`);
           }}
           disabled={out}
-          className="mt-2 sm:mt-3 w-full bg-primary text-primary-foreground font-black uppercase tracking-widest py-2.5 sm:py-3 rounded-xl glow-soft disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+          className="mt-2 sm:mt-3 w-full bg-primary text-primary-foreground font-black uppercase tracking-widest py-2 sm:py-2.5 rounded-xl glow-soft disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
         >
           {out ? "Нет в наличии" : "В корзину"}
         </button>
@@ -585,6 +584,7 @@ function CartDrawer({
                   <img
                     src={i.product.image}
                     alt={i.product.name}
+                    decoding="async"
                     className="w-full h-full object-contain"
                     onError={() => setBrokenMap((m) => ({ ...m, [i.product.id]: true }))}
                   />

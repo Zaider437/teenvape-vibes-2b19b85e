@@ -1,9 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { buildDescription, formatImageUrl } from "./products";
+import { buildDescription, formatImageUrl } from "./product-helpers";
 
 describe("buildDescription", () => {
   it("returns existing description if provided", () => {
-    expect(buildDescription({ description: "  Existing desc  ", brand: "X" })).toBe("Existing desc");
+    expect(buildDescription({ description: "  Existing desc  ", brand: "X" })).toBe(
+      "Existing desc",
+    );
   });
 
   it("builds disposable description with defaults when fields missing", () => {
@@ -63,7 +65,12 @@ describe("buildDescription", () => {
   });
 
   it("builds consumable description with optional fields", () => {
-    const desc = buildDescription({ category: "consumable", brand: "GeekVape", flavor: "Сменный испаритель", volume: "0.6Ω Mesh" });
+    const desc = buildDescription({
+      category: "consumable",
+      brand: "GeekVape",
+      flavor: "Сменный испаритель",
+      volume: "0.6Ω Mesh",
+    });
     expect(desc).toContain("Расходник для GeekVape.");
     expect(desc).toContain("Сменный испаритель");
     expect(desc).toContain("0.6Ω Mesh");
@@ -90,7 +97,15 @@ describe("formatImageUrl", () => {
     expect(formatImageUrl("/assets/xros5mini/silver.jpg")).toBe("/assets/xros5mini/silver.jpg");
   });
 
+  it("returns Supabase URLs with resizing params", () => {
+    expect(formatImageUrl("product-images/photo.jpg")).toBe(
+      "https://ueazjqvxjlppgtkhcmut.supabase.co/storage/v1/object/public/product-images/photo.jpg?width=400&quality=80&format=webp",
+    );
+  });
+
   it("returns other URLs unchanged", () => {
-    expect(formatImageUrl("https://cdn.example.com/img.jpg")).toBe("https://cdn.example.com/img.jpg");
+    expect(formatImageUrl("https://cdn.example.com/img.jpg")).toBe(
+      "https://cdn.example.com/img.jpg",
+    );
   });
 });

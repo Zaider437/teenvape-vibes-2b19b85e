@@ -8,26 +8,27 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
   const now = Date.now();
   const cached = adminCache.get(context.userId);
   if (cached && cached.expires > now) {
-    return; // Cache hit! Extremely fast!
+    return;
   }
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  // 1) Try standard has_role RPC check
   let isAuthorized = false;
+
   try {
-    const { data: hasRole, error } = await supabaseAdmin.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (!error && hasRole) {
+    const { data, error } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!error && data) {
       isAuthorized = true;
     }
   } catch (e) {
-    console.warn("[assertAdmin] RPC has_role failed, trying fallback", e);
+    console.warn("[assertAdmin] Direct role check failed", e);
   }
 
-  // 2) Fallback: Check if the user is a whitelisted Telegram user
   if (!isAuthorized) {
     try {
       const { data: userRes, error: userErr } = await supabaseAdmin.auth.admin.getUserById(context.userId);
@@ -50,7 +51,6 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
   }
 
   if (isAuthorized) {
-    // Cache the successful check for 10 minutes
     adminCache.set(context.userId, { expires: now + 10 * 60 * 1000 });
     return;
   }
@@ -86,7 +86,7 @@ export const adminListProducts = createServerFn({ method: "GET" })
       .select("*")
       .order("sort_order", { ascending: true });
     if (error) throw error;
-    const { formatImageUrl, buildDescription } = await import("./products");
+    const { formatImageUrl, buildDescription } = await import("./product-helpers");
     return (data ?? []).map((p: any) => ({
       ...p,
       image_url: formatImageUrl(p.image_url),
@@ -156,6 +156,65 @@ export const adminToggleStock = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (error) throw error;
     return { ok: true };
+  });
+
+export const adminMoveOrCopyProduct = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({
+      id: z.string(),
+      targetCategory: z.string().trim().min(1),
+      targetSubcategory: z.string().trim().max(1000).optional().nullable(),
+      mode: z.enum(["move", "copy"]),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const targetSubcategory = (data.targetSubcategory || "").trim() || null;
+
+    if (data.mode === "move") {
+      const updatePayload: Record<string, any> = { category: data.targetCategory };
+      updatePayload.subcategory = targetSubcategory;
+      const { error } = await supabaseAdmin
+        .from("products" as any)
+        .update(updatePayload)
+        .eq("id", data.id);
+      if (error) throw error;
+      return { ok: true, mode: "move" };
+    }
+
+    const { data: source, error: fetchError } = await supabaseAdmin
+      .from("products" as any)
+      .select("*")
+      .eq("id", data.id)
+      .single();
+    if (fetchError) throw fetchError;
+    if (!source) throw new Error("Товар не найден");
+
+    const src = source as any;
+    const { error: insertError } = await supabaseAdmin
+      .from("products" as any)
+      .insert({
+        slug: src.slug,
+        name: "Копия: " + src.name,
+        brand: src.brand,
+        category: data.targetCategory,
+        subcategory: targetSubcategory ?? src.subcategory,
+        price: src.price,
+        flavor: src.flavor,
+        puffs: src.puffs,
+        volume: src.volume,
+        emoji: src.emoji,
+        color: src.color,
+        image_url: src.image_url,
+        description: src.description,
+        in_stock: src.in_stock,
+        sort_order: src.sort_order,
+      });
+    if (insertError) throw insertError;
+    return { ok: true, mode: "copy" };
   });
 
 // ---- Admin Telegram whitelist ----

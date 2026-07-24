@@ -1,14 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Pencil, Trash2, Check, X as XIcon, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X as XIcon, Search, Copy, FolderInput } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import {
   adminListProducts,
   adminUpsertProduct,
   adminDeleteProduct,
   adminToggleStock,
+  adminMoveOrCopyProduct,
 } from "@/lib/admin.functions";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 type ProductRow = {
   id: string;
@@ -26,6 +34,7 @@ type ProductRow = {
   description: string | null;
   in_stock: boolean;
   sort_order: number;
+  subcategory?: string | null;
 };
 
 type Draft = {
@@ -44,6 +53,7 @@ type Draft = {
   description: string;
   in_stock: boolean;
   sort_order: string;
+  subcategory?: string;
 };
 
 const EMPTY: Draft = {
@@ -76,7 +86,7 @@ const CATEGORY_MAP: Record<string, string> = {
 };
 
 function getCategoryLabel(id: string): string {
-  return CATEGORY_MAP[id] || (id.charAt(0).toUpperCase() + id.slice(1));
+  return CATEGORY_MAP[id] || id.charAt(0).toUpperCase() + id.slice(1);
 }
 
 function ProductsAdmin() {
@@ -93,6 +103,11 @@ function ProductsAdmin() {
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState<Draft | null>(null);
   const [showCustomCategoryInput, setShowCustomCategoryInput] = useState(false);
+  const [moveCopyTarget, setMoveCopyTarget] = useState<ProductRow | null>(null);
+  const [moveCopyMode, setMoveCopyMode] = useState<"move" | "copy">("move");
+  const [moveCopyCategory, setMoveCopyCategory] = useState<string>("");
+  const [moveCopySubcategory, setMoveCopySubcategory] = useState<string>("");
+  const [moveCopyCustomSubcategory, setMoveCopyCustomSubcategory] = useState(false);
 
   const dynamicCategories = useMemo(() => {
     const uniqueCategories = Array.from(new Set(rows.map((r) => r.category)));
@@ -114,12 +129,23 @@ function ProductsAdmin() {
     const unique = Array.from(new Set(rows.map((r) => r.category)));
     const list = [...defaults];
     for (const id of unique) {
-      if (!list.some(item => item.id === id)) {
+      if (!list.some((item) => item.id === id)) {
         const label = id.charAt(0).toUpperCase() + id.slice(1);
         list.push({ id, label });
       }
     }
     return list;
+  }, [rows]);
+
+  const subcategoriesByCategory = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const r of rows) {
+      if (!r.subcategory) continue;
+      const list = map.get(r.category) || [];
+      if (!list.includes(r.subcategory)) list.push(r.subcategory);
+      map.set(r.category, list);
+    }
+    return map;
   }, [rows]);
 
   async function reload(silent = false) {
@@ -163,7 +189,10 @@ function ProductsAdmin() {
     const q = query.trim().toLowerCase();
     if (!q) return list;
     return list.filter((r) => {
-      const hay = [r.name, r.brand, r.flavor, r.puffs, r.volume].filter(Boolean).join(" ").toLowerCase();
+      const hay = [r.name, r.brand, r.flavor, r.puffs, r.volume]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
       return hay.includes(q);
     });
   }, [inCategory, hasSub, brand, flavor, query]);
@@ -188,8 +217,10 @@ function ProductsAdmin() {
       emoji: row.emoji || "🔥",
       color: (row.color as Draft["color"]) ?? "pink",
       image_url: row.image_url ?? "",
+      description: row.description ?? "",
       in_stock: row.in_stock,
       sort_order: String(row.sort_order),
+      subcategory: row.subcategory ?? "",
     });
   }
 
@@ -197,7 +228,11 @@ function ProductsAdmin() {
     if (!draft) return;
     const isEdit = !!draft.id;
     const savedProduct: ProductRow = {
-      id: draft.id || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2)),
+      id:
+        draft.id ||
+        (typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : Math.random().toString(36).substring(2)),
       slug: draft.slug.trim(),
       name: draft.name.trim(),
       brand: draft.brand.trim(),
@@ -209,8 +244,10 @@ function ProductsAdmin() {
       emoji: draft.emoji.trim() || "🔥",
       color: draft.color,
       image_url: draft.image_url || null,
+      description: draft.description || null,
       in_stock: draft.in_stock,
       sort_order: Number(draft.sort_order) || 0,
+      subcategory: draft.subcategory || null,
     };
 
     // Optimistically update local state instantly
@@ -242,8 +279,10 @@ function ProductsAdmin() {
           emoji: draft.emoji.trim() || "🔥",
           color: draft.color,
           image_url: draft.image_url,
+          description: draft.description,
           in_stock: draft.in_stock,
           sort_order: Number(draft.sort_order) || 0,
+          subcategory: draft.subcategory,
         },
       });
       toast.success(isEdit ? "Сохранено" : "Товар добавлен");
@@ -285,6 +324,44 @@ function ProductsAdmin() {
     }
   }
 
+  async function moveOrCopy(row: ProductRow, mode: "move" | "copy") {
+    setMoveCopyTarget(row);
+    setMoveCopyMode(mode);
+    setMoveCopyCategory("");
+    setMoveCopySubcategory("");
+    setMoveCopyCustomSubcategory(false);
+  }
+
+  async function confirmMoveCopy(targetCategory: string, targetSubcategory?: string | null) {
+    if (!moveCopyTarget) return;
+    const row = moveCopyTarget;
+    const normalizedSubcategory = (targetSubcategory ?? "").trim() || null;
+    try {
+      await adminMoveOrCopyProduct({
+        data: {
+          id: row.id,
+          targetCategory,
+          targetSubcategory: normalizedSubcategory,
+          mode: moveCopyMode,
+        },
+      });
+      const categoryLabel = getCategoryLabel(targetCategory);
+      const subLabel = normalizedSubcategory ? ` · ${normalizedSubcategory}` : "";
+      toast.success(
+        moveCopyMode === "move"
+          ? `Перемещено в «${categoryLabel}${subLabel}»`
+          : `Скопировано в «${categoryLabel}${subLabel}»`,
+      );
+      setMoveCopyTarget(null);
+      setMoveCopyCategory("");
+      setMoveCopySubcategory("");
+      setMoveCopyCustomSubcategory(false);
+      await reload(true);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Не удалось выполнить");
+    }
+  }
+
   return (
     <div className="space-y-4">
       <Toaster position="top-center" theme="dark" richColors />
@@ -303,7 +380,10 @@ function ProductsAdmin() {
 
       {/* search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" strokeWidth={2.5} />
+        <Search
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"
+          strokeWidth={2.5}
+        />
         <input
           type="search"
           inputMode="search"
@@ -340,7 +420,12 @@ function ProductsAdmin() {
       {hasSub && (brandOptions.length > 0 || flavorOptions.length > 0) && (
         <div className="space-y-2">
           {brandOptions.length > 0 && (
-            <SubRow label="Производитель" options={brandOptions} value={brand} onChange={setBrand} />
+            <SubRow
+              label="Производитель"
+              options={brandOptions}
+              value={brand}
+              onChange={setBrand}
+            />
           )}
           {flavorOptions.length > 0 && (
             <SubRow
@@ -358,7 +443,10 @@ function ProductsAdmin() {
       ) : (
         <div className="grid gap-2">
           {visible.map((row) => (
-            <div key={row.id} className="bg-card border border-border rounded-xl p-3 flex items-center gap-3">
+            <div
+              key={row.id}
+              className="bg-card border border-border rounded-xl p-3 flex items-center gap-3"
+            >
               <div className="w-12 h-12 rounded-lg bg-muted grid place-items-center text-2xl shrink-0 overflow-hidden">
                 {row.image_url ? (
                   <img src={row.image_url} alt="" className="w-full h-full object-contain" />
@@ -367,35 +455,55 @@ function ProductsAdmin() {
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{row.brand} · {row.category} {row.subcategory ? `· ${row.subcategory}` : ""}</div>
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {row.brand} · {row.category} {row.subcategory ? `· ${row.subcategory}` : ""}
+                </div>
                 <div className="font-bold text-sm leading-snug break-words">{row.name}</div>
                 <div className="text-xs text-muted-foreground break-words">
                   {row.flavor || row.volume || row.puffs || "—"}
                 </div>
               </div>
-              <div className="text-right shrink-0">
-                <div className="font-display text-lg">{Number(row.price).toFixed(2)}</div>
-                <div className="text-[10px] text-muted-foreground">BYN</div>
+              <div className="flex items-center gap-3 sm:gap-1.5 sm:ml-auto sm:flex-row flex-wrap">
+                <div className="text-right sm:text-right w-full sm:w-auto">
+                  <div className="font-display text-lg">{Number(row.price).toFixed(2)}</div>
+                  <div className="text-[10px] text-muted-foreground">BYN</div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => moveOrCopy(row, "move")}
+                    title="Переместить в каталог/подкаталог"
+                    className="w-10 h-10 sm:w-9 sm:h-9 rounded-lg grid place-items-center bg-blue-500/10 text-blue-500 hover:bg-blue-500/20"
+                  >
+                    <FolderInput className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => moveOrCopy(row, "copy")}
+                    title="Копировать в каталог/подкаталог"
+                    className="w-10 h-10 sm:w-9 sm:h-9 rounded-lg grid place-items-center bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => flipStock(row)}
+                    title={row.in_stock ? "В наличии" : "Нет в наличии"}
+                    className={`w-10 h-10 sm:w-9 sm:h-9 rounded-lg grid place-items-center ${row.in_stock ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                  >
+                    {row.in_stock ? <Check className="w-4 h-4" /> : <XIcon className="w-4 h-4" />}
+                  </button>
+                  <button
+                    onClick={() => edit(row)}
+                    className="w-10 h-10 sm:w-9 sm:h-9 rounded-lg grid place-items-center bg-muted"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => del(row)}
+                    className="w-10 h-10 sm:w-9 sm:h-9 rounded-lg grid place-items-center bg-destructive/20 text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={() => flipStock(row)}
-                title={row.in_stock ? "В наличии" : "Нет в наличии"}
-                className={`w-9 h-9 rounded-lg grid place-items-center ${row.in_stock ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
-              >
-                {row.in_stock ? <Check className="w-4 h-4" /> : <XIcon className="w-4 h-4" />}
-              </button>
-              <button
-                onClick={() => edit(row)}
-                className="w-9 h-9 rounded-lg grid place-items-center bg-muted"
-              >
-                <Pencil className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => del(row)}
-                className="w-9 h-9 rounded-lg grid place-items-center bg-destructive/20 text-destructive"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
             </div>
           ))}
         </div>
@@ -410,6 +518,202 @@ function ProductsAdmin() {
           rows={rows}
         />
       )}
+
+      <Dialog open={!!moveCopyTarget} onOpenChange={(open) => !open && setMoveCopyTarget(null)}>
+        <DialogContent className="max-w-sm w-[calc(100%-2rem)] max-h-[85vh] overflow-y-auto">
+          <DialogHeader className="sticky top-0 bg-background z-10 pb-2">
+            <DialogTitle className="text-base">
+              {moveCopyMode === "move" ? "Переместить в каталог" : "Копировать в каталог"}
+            </DialogTitle>
+          </DialogHeader>
+          {moveCopyTarget && (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Товар: <span className="font-semibold text-foreground">{moveCopyTarget.name}</span>
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                Текущий каталог: {getCategoryLabel(moveCopyTarget.category)}
+                {moveCopyTarget.subcategory ? ` · ${moveCopyTarget.subcategory}` : ""}
+              </p>
+
+              {moveCopyMode === "copy" ? (
+                <div className="grid gap-2">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Выберите категорию и подкаталог
+                  </div>
+                  {formCategories
+                    .filter((c) => c.id !== "all")
+                    .map((c) => {
+                      const subs = subcategoriesByCategory.get(c.id) || [];
+                      const hasSubs = subs.length > 0;
+                      return (
+                        <div key={c.id} className="grid gap-1">
+                          <div className="text-[11px] font-bold text-foreground">{c.label}</div>
+                          <button
+                            onClick={() => confirmMoveCopy(c.id, "")}
+                            className="w-full text-left px-2.5 py-1.5 rounded-lg bg-card border border-border hover:border-primary hover:bg-primary/5 transition-colors"
+                          >
+                            <span className="font-semibold text-[11px]">Без подкаталога</span>
+                          </button>
+                          {hasSubs &&
+                            subs.map((sub) => (
+                              <button
+                                key={sub}
+                                onClick={() => confirmMoveCopy(c.id, sub)}
+                                className="w-full text-left px-2.5 py-1.5 rounded-lg bg-card border border-border hover:border-primary hover:bg-primary/5 transition-colors"
+                              >
+                                <span className="font-semibold text-[11px]">{sub}</span>
+                              </button>
+                            ))}
+                          <CustomSubcategoryInput
+                            categoryId={c.id}
+                            categoryLabel={c.label}
+                            onConfirm={(sub) => confirmMoveCopy(c.id, sub)}
+                          />
+                        </div>
+                      );
+                    })}
+                </div>
+              ) : (
+                <div className="grid gap-1.5">
+                  {!moveCopyCategory ? (
+                    <>
+                      <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        Шаг 1. Выберите каталог
+                      </div>
+                      {formCategories
+                        .filter((c) => c.id !== "all" && c.id !== moveCopyTarget.category)
+                        .map((c) => (
+                          <button
+                            key={c.id}
+                            onClick={() => {
+                              setMoveCopyCategory(c.id);
+                              setMoveCopySubcategory("");
+                              setMoveCopyCustomSubcategory(false);
+                            }}
+                            className="w-full text-left px-3 py-2 rounded-lg bg-card border border-border hover:border-primary hover:bg-primary/5 transition-colors"
+                          >
+                            <span className="font-semibold text-xs">{c.label}</span>
+                          </button>
+                        ))}
+                      {formCategories.filter(
+                        (c) => c.id !== "all" && c.id !== moveCopyTarget.category,
+                      ).length === 0 && (
+                        <p className="text-xs text-muted-foreground text-center py-3">
+                          Нет других каталогов
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        Шаг 2. Подкаталог для «{getCategoryLabel(moveCopyCategory)}»
+                      </div>
+                      <button
+                        onClick={() => confirmMoveCopy(moveCopyCategory, "")}
+                        className="w-full text-left px-3 py-2 rounded-lg bg-card border border-border hover:border-primary hover:bg-primary/5 transition-colors"
+                      >
+                        <span className="font-semibold text-xs">Без подкаталога</span>
+                      </button>
+                      {(subcategoriesByCategory.get(moveCopyCategory) || []).map((sub) => (
+                        <button
+                          key={sub}
+                          onClick={() => confirmMoveCopy(moveCopyCategory, sub)}
+                          className="w-full text-left px-3 py-2 rounded-lg bg-card border border-border hover:border-primary hover:bg-primary/5 transition-colors"
+                        >
+                          <span className="font-semibold text-xs">{sub}</span>
+                        </button>
+                      ))}
+                      <CustomSubcategoryInput
+                        categoryId={moveCopyCategory}
+                        categoryLabel={getCategoryLabel(moveCopyCategory)}
+                        onConfirm={(sub) => confirmMoveCopy(moveCopyCategory, sub)}
+                      />
+                      <button
+                        onClick={() => {
+                          setMoveCopyCategory("");
+                          setMoveCopySubcategory("");
+                          setMoveCopyCustomSubcategory(false);
+                        }}
+                        className="text-[11px] text-muted-foreground underline"
+                      >
+                        ← Назад к выбору каталога
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter className="sticky bottom-0 bg-background z-10 pt-2">
+            <button
+              onClick={() => setMoveCopyTarget(null)}
+              className="px-3 py-1.5 rounded-lg bg-muted font-semibold text-xs"
+            >
+              Отмена
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function CustomSubcategoryInput({
+  categoryId,
+  categoryLabel,
+  onConfirm,
+}: {
+  categoryId: string;
+  categoryLabel: string;
+  onConfirm: (sub: string) => void;
+}) {
+  const [value, setValue] = useState("");
+  const [open, setOpen] = useState(false);
+
+  const submit = () => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    onConfirm(trimmed);
+    setValue("");
+    setOpen(false);
+  };
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="w-full text-left px-2.5 py-1.5 rounded-lg bg-card border border-dashed border-border hover:border-primary hover:bg-primary/5 transition-colors"
+      >
+        <span className="font-semibold text-[11px]">
+          + Свой подкаталог для «{categoryLabel}»...
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex gap-1.5">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="Например: VOZOL VISTA"
+        className="flex-1 bg-background border-2 border-border rounded-lg px-2.5 py-1.5 text-xs"
+        autoFocus
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            submit();
+          }
+        }}
+      />
+      <button
+        onClick={submit}
+        className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground font-semibold text-xs"
+      >
+        Ок
+      </button>
     </div>
   );
 }
@@ -440,7 +744,7 @@ function DraftEditor({
     const unique = Array.from(new Set(rows.map((r) => r.category)));
     const list = [...defaults];
     for (const id of unique) {
-      if (!list.some(item => item.id === id)) {
+      if (!list.some((item) => item.id === id)) {
         const label = id.charAt(0).toUpperCase() + id.slice(1);
         list.push({ id, label });
       }
@@ -453,18 +757,27 @@ function DraftEditor({
       <div className="bg-card border border-border rounded-2xl p-4 w-full max-w-lg max-h-[90vh] overflow-y-auto space-y-3">
         <div className="flex justify-between items-center">
           <h3 className="font-display text-xl">{draft.id ? "Редактировать" : "Новый товар"}</h3>
-          <button onClick={onCancel} className="w-8 h-8 rounded-lg bg-muted grid place-items-center">
+          <button
+            onClick={onCancel}
+            className="w-8 h-8 rounded-lg bg-muted grid place-items-center"
+          >
             <XIcon className="w-4 h-4" />
           </button>
         </div>
         <F label="Slug (уникальный)" v={draft.slug} on={(v) => set("slug", v)} />
         <F label="Название" v={draft.name} on={(v) => set("name", v)} />
         <F label="Бренд" v={draft.brand} on={(v) => set("brand", v)} />
-        <F label="Подкатегория (опционально)" v={draft.subcategory} on={(v) => set("subcategory", v)} />
+        <F
+          label="Подкатегория (опционально)"
+          v={draft.subcategory || ""}
+          on={(v) => set("subcategory", v)}
+        />
         <label className="block">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Категория</span>
+          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            Категория
+          </span>
           <select
-            value={showCustomCategoryInput ? "+custom" : draft.category}
+            value={showCustomCategoryInput ? "+custom" : draft.category || "disposable"}
             onChange={(e) => {
               const val = e.target.value;
               if (val === "+custom") {
@@ -478,7 +791,9 @@ function DraftEditor({
             className="mt-1 w-full bg-background border-2 border-border rounded-xl px-3 py-2.5 text-sm"
           >
             {formCategories.map((c) => (
-              <option key={c.id} value={c.id}>{c.label}</option>
+              <option key={c.id} value={c.id}>
+                {c.label}
+              </option>
             ))}
             <option value="+custom">+ Добавить новую...</option>
           </select>
@@ -498,7 +813,9 @@ function DraftEditor({
         <F label="Объём / характеристики" v={draft.volume} on={(v) => set("volume", v)} />
         <F label="Эмодзи (если нет фото)" v={draft.emoji} on={(v) => set("emoji", v)} />
         <label className="block">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Цвет акцента</span>
+          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            Цвет акцента
+          </span>
           <select
             value={draft.color}
             onChange={(e) => set("color", e.target.value as Draft["color"])}
@@ -510,7 +827,12 @@ function DraftEditor({
           </select>
         </label>
         <F label="URL картинки (опционально)" v={draft.image_url} on={(v) => set("image_url", v)} />
-        <F label="Порядок сортировки" v={draft.sort_order} on={(v) => set("sort_order", v)} type="number" />
+        <F
+          label="Порядок сортировки"
+          v={draft.sort_order}
+          on={(v) => set("sort_order", v)}
+          type="number"
+        />
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -520,7 +842,10 @@ function DraftEditor({
           <span>В наличии</span>
         </label>
         <div className="flex gap-2 pt-2">
-          <button onClick={onSave} className="flex-1 bg-primary text-primary-foreground font-bold py-2.5 rounded-lg">
+          <button
+            onClick={onSave}
+            className="flex-1 bg-primary text-primary-foreground font-bold py-2.5 rounded-lg"
+          >
             Сохранить
           </button>
           <button onClick={onCancel} className="px-4 py-2.5 rounded-lg bg-muted font-semibold">
@@ -545,7 +870,9 @@ function F({
 }) {
   return (
     <label className="block">
-      <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
+      <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </span>
       <input
         type={type}
         value={v}
@@ -569,7 +896,9 @@ function SubRow({
 }) {
   return (
     <div>
-      <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">{label}</div>
+      <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+        {label}
+      </div>
       <div className="flex gap-1.5 overflow-x-auto pb-1">
         <button
           onClick={() => onChange("all")}
@@ -590,4 +919,3 @@ function SubRow({
     </div>
   );
 }
-
