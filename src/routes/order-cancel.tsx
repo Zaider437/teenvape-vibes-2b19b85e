@@ -1,7 +1,7 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { getOrderByToken, cancelOrder } from "@/lib/orders.functions";
+import { cancelOrder, getOrderByToken } from "@/lib/orders.functions";
 import { Link } from "@tanstack/react-router";
 import { toast, Toaster } from "sonner";
 import { ShoppingBag, X, AlertCircle, CheckCircle2 } from "lucide-react";
@@ -35,7 +35,7 @@ export function OrderCancelPage() {
     customer_name: string;
     customer_address: string;
     customer_note: string | null;
-    items: Array<{ name: string; qty: number; price: number }>;
+    items: Array<{ name: string; brand: string; qty: number; price: number; flavor?: string | null; image?: string | null }>;
     total_amount: number;
     status: string;
     created_at: string;
@@ -47,27 +47,25 @@ export function OrderCancelPage() {
 
   useEffect(() => {
     if (!token) {
-      setLoading(false);
       setError("В ссылке отсутствует токен отмены.");
+      setLoading(false);
       return;
     }
-    let cancelled = false;
-    fetchOrder({ data: { token } })
-      .then((o) => {
-        if (cancelled) return;
-        setOrder(o);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setError(err?.message ?? "Не удалось найти заказ.");
-      })
-      .finally(() => {
-        if (cancelled) return;
+    async function loadOrder() {
+      try {
+        const orderData = await fetchOrder({ data: { token } });
+        if (orderData && orderData.id) {
+          setOrder(orderData);
+        } else {
+          setError("Заказ не найден.");
+        }
+      } catch {
+        setError("Неверный формат ссылки отмены.");
+      } finally {
         setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
+      }
+    }
+    loadOrder();
   }, [token, fetchOrder]);
 
   async function handleCancel() {
@@ -156,7 +154,7 @@ export function OrderCancelPage() {
                 {order.items.map((i, idx) => (
                   <div key={idx} className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
-                      {i.name} × {i.qty}
+                      {i.name} ({i.brand}){i.flavor ? `, ${i.flavor}` : ""} × {i.qty}
                     </span>
                     <span className="font-semibold">{(i.price * i.qty).toFixed(2)} BYN</span>
                   </div>

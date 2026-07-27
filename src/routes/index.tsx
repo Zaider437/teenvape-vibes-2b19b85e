@@ -11,6 +11,8 @@ import {
   CheckCircle2,
   Heart,
   Search,
+  MessageCircle,
+  Send,
 } from "lucide-react";
 import { CartProvider, useCart } from "../lib/cart";
 import { CATEGORIES, fetchProducts, formatImageUrl, type Product } from "../lib/products";
@@ -31,16 +33,19 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
-  component: () => (
-    <CartProvider>
-      <FallingEffects />
-      <Shop />
-      <Toaster position="top-center" theme="dark" richColors />
-    </CartProvider>
-  ),
+  component: () => {
+    const [snowActive, setSnowActive] = useState<boolean | undefined>(undefined);
+    return (
+      <CartProvider>
+        <FallingEffects onSnowChange={setSnowActive} />
+        <Shop snowActive={snowActive} />
+        <Toaster position="top-center" theme="dark" richColors />
+      </CartProvider>
+    );
+  },
 });
 
-export function Shop() {
+export function Shop({ snowActive }: { snowActive?: boolean }) {
   const [category, setCategory] = useState<string>("all");
   const [brand, setBrand] = useState<string>("all");
   const [flavor, setFlavor] = useState<string>("all");
@@ -140,7 +145,7 @@ export function Shop() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
-      <Header onOpenCart={() => setCartOpen(true)} />
+      <Header onOpenCart={() => setCartOpen(true)} snowActive={snowActive} />
       <Hero total={products.length} />
 
       {/* search */}
@@ -176,15 +181,15 @@ export function Shop() {
       <div className="px-3 sm:px-4 mt-2 sm:mt-3">
         <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1.5 sm:pb-2 -mx-3 sm:-mx-4 px-3 sm:px-4 snap-x">
           {dynamicCategories.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => selectCategory(c.id)}
-              className={`snap-start shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all ${
-                category === c.id
-                  ? "bg-primary text-primary-foreground border-primary glow-pink"
-                  : "bg-card text-foreground border-border hover:border-primary/60"
-              }`}
-            >
+<button
+                key={c.id}
+                onClick={() => selectCategory(c.id)}
+                className={`snap-start shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all ${
+                  category === c.id
+                    ? "bg-primary text-primary-foreground border-primary glow-pink"
+                    : "bg-card text-foreground border-border hover:border-primary/60"
+                }`}
+              >
               <span className="mr-1">{c.emoji}</span>
               {c.label}
             </button>
@@ -290,26 +295,26 @@ function SubFilterRow({
         {label}
       </div>
       <div className="flex gap-1 sm:gap-1.5 overflow-x-auto pb-1 -mx-3 sm:-mx-4 px-3 sm:px-4 snap-x">
-        <button
-          onClick={() => onChange("all")}
-          className={`snap-start shrink-0 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
-            value === "all"
-              ? "bg-secondary text-secondary-foreground border-secondary"
-              : "bg-card text-muted-foreground border-border hover:border-secondary/60"
-          }`}
-        >
-          Все
-        </button>
-        {options.map((opt) => (
-          <button
-            key={opt}
-            onClick={() => onChange(opt)}
-            className={`snap-start shrink-0 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
-              value === opt
-                ? "bg-secondary text-secondary-foreground border-secondary"
-                : "bg-card text-muted-foreground border-border hover:border-secondary/60"
-            }`}
-          >
+<button
+              onClick={() => onChange("all")}
+              className={`snap-start shrink-0 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
+                value === "all"
+                  ? "bg-secondary text-secondary-foreground border-secondary"
+                  : "bg-card text-muted-foreground border-border hover:border-secondary/60"
+              }`}
+            >
+              Все
+            </button>
+{options.map((opt) => (
+            <button
+              key={opt}
+              onClick={() => onChange(opt)}
+              className={`snap-start shrink-0 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
+                value === opt
+                  ? "bg-secondary text-secondary-foreground border-secondary"
+                  : "bg-card text-muted-foreground border-border hover:border-secondary/60"
+              }`}
+            >
             {opt}
           </button>
         ))}
@@ -318,14 +323,19 @@ function SubFilterRow({
   );
 }
 
-function Header({ onOpenCart }: { onOpenCart: () => void }) {
+function Header({ onOpenCart, snowActive }: { onOpenCart: () => void; snowActive?: boolean }) {
   const { count } = useCart();
   return (
     <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-lg border-b border-border">
       <div className="px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="h-8 sm:h-11 flex items-center">
+          <div className="h-8 sm:h-11 flex items-center relative">
             <LoveVapeLogo className="h-7 sm:h-9 w-auto" />
+            {snowActive && (
+              <span className="absolute -top-1 -right-1 text-base animate-bounce" aria-hidden="true">
+                🎄
+              </span>
+            )}
           </div>
           <div className="leading-none">
             <div className="font-display text-xl sm:text-2xl tracking-tight">
@@ -334,18 +344,40 @@ function Header({ onOpenCart }: { onOpenCart: () => void }) {
             </div>
           </div>
         </div>
-        <button
-          onClick={onOpenCart}
-          className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-primary text-primary-foreground grid place-items-center glow-soft active:translate-y-0.5"
-          aria-label="Корзина"
-        >
-          <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
-          {count > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 min-w-5 h-5 sm:min-w-6 sm:h-6 px-1 rounded-full bg-secondary text-secondary-foreground text-[10px] sm:text-xs font-black grid place-items-center border-2 border-background">
-              {count}
-            </span>
-          )}
-        </button>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <a
+            href="https://t.me/+uEve7WOFVxpmM2Ey"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="h-8 sm:h-9 rounded-lg sm:rounded-xl bg-primary text-primary-foreground px-1.5 sm:px-2.5 grid place-items-center gap-1 glow-soft active:translate-y-0.5 text-[10px] sm:text-xs font-bold"
+            aria-label="Чат Telegram"
+          >
+            <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2.5} />
+            <span>Наш чат</span>
+          </a>
+          <a
+            href="https://t.me/Love_Vape1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="h-8 sm:h-9 rounded-lg sm:rounded-xl bg-secondary text-secondary-foreground px-1.5 sm:px-2.5 grid place-items-center gap-1 active:translate-y-0.5 text-[10px] sm:text-xs font-bold"
+            aria-label="Связь с нами в Telegram"
+          >
+            <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2.5} />
+            <span>Связь с нами</span>
+          </a>
+          <button
+            onClick={onOpenCart}
+            className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary text-primary-foreground grid place-items-center glow-soft active:translate-y-0.5"
+            aria-label="Корзина"
+          >
+            <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2.5} />
+            {count > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 min-w-4 h-4 sm:min-w-5 sm:h-5 px-0.5 rounded-full bg-secondary text-secondary-foreground text-[9px] sm:text-[10px] font-black grid place-items-center border-2 border-background">
+                {count}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
     </header>
   );
@@ -458,7 +490,7 @@ function ProductCard({ product, onOpen }: { product: Product; onOpen: (p: Produc
             onClick={() => {
               if (out) return;
               add(product);
-              toast.success(`${product.name} в корзине`);
+              toast.success(`${product.name}${product.flavor ? ` (${product.flavor})` : ""} в корзине`);
             }}
             disabled={out}
             className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg grid place-items-center bg-primary text-primary-foreground glow-soft active:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -596,6 +628,9 @@ function CartDrawer({
                 <div className="text-xs sm:text-sm font-bold truncate leading-tight">
                   {i.product.name}
                 </div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground truncate leading-tight">
+                  {i.product.brand}
+                </div>
                 {i.product.flavor && (
                   <div className="text-[10px] sm:text-xs text-muted-foreground truncate leading-tight">
                     {i.product.flavor}
@@ -703,6 +738,7 @@ function CheckoutSheet({ onClose }: { onClose: () => void }) {
             name: i.product.name,
             price: i.product.price,
             qty: i.qty,
+            flavor: i.product.flavor || null,
           })),
           total_amount: total,
           origin: typeof window !== "undefined" ? window.location.origin : undefined,
@@ -793,13 +829,13 @@ function CheckoutSheet({ onClose }: { onClose: () => void }) {
                 Заказ
               </div>
               {items.map((i) => (
-                <div key={i.product.id} className="flex justify-between text-sm py-0.5">
-                  <span className="truncate mr-2">
-                    {i.product.name} × {i.qty}
-                  </span>
-                  <span className="font-bold shrink-0">{(i.product.price * i.qty).toFixed(2)}</span>
-                </div>
-              ))}
+                  <div key={i.product.id} className="flex justify-between text-sm py-0.5">
+                    <span className="truncate mr-2">
+                      {i.product.brand} — {i.product.name}{i.product.flavor ? `, ${i.product.flavor}` : ""} × {i.qty}
+                    </span>
+                    <span className="font-bold shrink-0">{(i.product.price * i.qty).toFixed(2)}</span>
+                  </div>
+                ))}
               <div className="mt-2 pt-2 border-t border-border flex justify-between font-display text-xl">
                 <span>Итого</span>
                 <span className="text-primary">{total.toFixed(2)} BYN</span>

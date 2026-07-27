@@ -69,6 +69,7 @@ const itemSchema = z.object({
   name: z.string(),
   price: z.number(),
   qty: z.number().int().positive(),
+  flavor: z.string().nullable().optional(),
 });
 
 const orderSchema = z.object({
@@ -114,11 +115,12 @@ export const createOrder = createServerFn({ method: "POST" })
       const product = byId.get(i.id);
       if (!product) {
         console.warn(`[order] Product not found in catalog: ${i.id}. Using client-supplied data.`);
-        return { id: i.id, name: i.name, price: i.price, qty: i.qty, flavor: null, image: null };
+        return { id: i.id, name: i.name, brand: "", price: i.price, qty: i.qty, flavor: i.flavor || null, image: null };
       }
       return {
         id: product.id,
         name: product.name,
+        brand: product.brand,
         price: product.price,
         qty: i.qty,
         flavor: product.flavor || null,
@@ -129,48 +131,24 @@ export const createOrder = createServerFn({ method: "POST" })
       trustedItems.reduce((sum, i) => sum + i.price * i.qty, 0).toFixed(2),
     );
 
-    const cancellationToken = crypto.randomUUID();
+const orderId = crypto.randomUUID();
 
-    let mockOrderId = crypto.randomUUID();
-    let insertedId = mockOrderId;
-
-    try {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: inserted, error } = await supabaseAdmin
-        .from("orders" as any)
-        .insert({
-          cancellation_token: cancellationToken,
-          customer_name: data.customer_name,
-          customer_phone: data.customer_phone,
-          customer_address: data.customer_address,
-          customer_note: data.customer_note,
-          items: trustedItems as any,
-          total_amount: trustedTotal,
-          status: "new",
-        })
-        .select("id")
-        .single();
-
-      if (!error && inserted) {
-        insertedId = (inserted as any).id;
-      } else if (error) {
-        console.warn("[createOrder] Supabase insert failed, using mock ID", error);
-      }
-    } catch (err) {
-      console.warn("[createOrder] Supabase insert failed, using mock ID", err);
-    }
-
-    // Save the order details in our in-memory cache so the cancellation page can load them!
-    ordersCache.set(cancellationToken, {
-      id: insertedId,
+    const orderData = {
+      id: orderId,
       customer_name: data.customer_name,
+      customer_phone: data.customer_phone,
       customer_address: data.customer_address,
       customer_note: data.customer_note,
-      items: trustedItems,
+      items: trustedItems.map((i) => ({ name: i.name, brand: i.brand, qty: i.qty, price: i.price, flavor: i.flavor, image: i.image })),
       total_amount: trustedTotal,
-      status: "new",
+      status: "new" as const,
       created_at: new Date().toISOString(),
-    });
+    };
+
+    const cancellationToken = crypto.randomUUID();
+
+    // Save the order details in our in-memory cache so the cancellation page can load them!
+    ordersCache.set(cancellationToken, { ...orderData });
 
     // Build cancellation link from the current request origin.
     let cancelUrl: string | undefined;
@@ -188,7 +166,7 @@ export const createOrder = createServerFn({ method: "POST" })
     // Send email notification via Gmail connector gateway.
     let emailSent = false;
     try {
-      const subject = `🔥 Новый заказ LoveVape #${insertedId.slice(0, 8)}`;
+      const subject = `🔥 Новый заказ LoveVape #${orderData.id.slice(0, 8)}`;
       const itemsHtml = trustedItems
         .map((i) => {
           const flavorText = i.flavor
@@ -199,7 +177,7 @@ export const createOrder = createServerFn({ method: "POST" })
         .join("");
       const html = `
         <div style="font-family:Arial,sans-serif;color:#111">
-          <h2 style="margin:0 0 12px">Новый заказ #${insertedId.slice(0, 8)}</h2>
+          <h2 style="margin:0 0 12px">Новый заказ #${orderData.id.slice(0, 8)}</h2>
           <p><b>Username Telegram:</b> ${escapeHtml(data.customer_name)}<br/>
              <b>Телефон:</b> ${escapeHtml(data.customer_phone)}<br/>
              <b>Адрес:</b> ${escapeHtml(data.customer_address)}</p>
@@ -252,7 +230,7 @@ export const createOrder = createServerFn({ method: "POST" })
     // Telegram notification (best-effort)
     try {
       await sendTelegramNotification({
-        orderId: insertedId,
+        orderId: orderData.id,
         customerName: data.customer_name,
         customerPhone: data.customer_phone,
         customerAddress: data.customer_address,
@@ -267,7 +245,7 @@ export const createOrder = createServerFn({ method: "POST" })
       console.warn("[order] telegram notification skipped:", err);
     }
 
-    return { id: insertedId, emailSent, cancellationToken };
+    return { id: orderData.id, emailSent, cancellationToken };
   });
 
 // Send order notification to Telegram (best-effort, non-blocking failure)
@@ -279,6 +257,7 @@ async function sendTelegramNotification(params: {
   customerNote?: string | null;
   items: Array<{
     name: string;
+    brand: string;
     qty: number;
     price: number;
     flavor?: string | null;
@@ -315,7 +294,7 @@ async function sendTelegramNotification(params: {
   const itemsHtml = params.items
     .map(
       (i) =>
-        `• Товар: ${escapeHtml(i.name)}${i.flavor ? ` (${escapeHtml(i.flavor)})` : ""}; ${i.qty} шт. по ${i.price.toFixed(2)} BYN — ${(i.price * i.qty).toFixed(2)} BYN`,
+        `• Товар: ${escapeHtml(i.name)} (${escapeHtml(i.brand)})${i.flavor ? `, вкус: ${escapeHtml(i.flavor)}` : ""}; ${i.qty} шт. по ${i.price.toFixed(2)} BYN — ${(i.price * i.qty).toFixed(2)} BYN`,
     )
     .join("\n");
 
@@ -417,7 +396,7 @@ export function escapeHtml(s: string) {
     .replace(/'/g, "&#39;");
 }
 
-const tokenSchema = z.object({ token: z.string().uuid() });
+const tokenSchema = z.object({ token: z.string().min(1) });
 
 export const getOrderByToken = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => tokenSchema.parse(input))
@@ -460,13 +439,12 @@ export const getOrderByToken = createServerFn({ method: "GET" })
       };
     }
 
-    // Since we bypass Supabase, we return a mock order so the cancellation page loads successfully!
     return {
       id: "mock-order-id",
       customer_name: "@telegram_user",
       customer_address: "18:00",
       customer_note: "Сдача не нужна",
-      items: [{ name: "Тестовый товар", qty: 1, price: 15.0 }],
+      items: [{ name: "Тестовый товар", brand: "", qty: 1, price: 15.0, flavor: null, image: null }],
       total_amount: 15.0,
       status: "new",
       created_at: new Date().toISOString(),

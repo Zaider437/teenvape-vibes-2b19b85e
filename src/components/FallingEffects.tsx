@@ -14,7 +14,11 @@ interface Particle {
   type: "snow" | "leaf";
 }
 
-export function FallingEffects() {
+interface FallingEffectsProps {
+  onSnowChange?: (active: boolean) => void;
+}
+
+export function FallingEffects({ onSnowChange }: FallingEffectsProps) {
   const getAnim = useServerFn(getAnimationSettings);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [activeEffects, setActiveEffects] = useState<{ snow: boolean; leaves: boolean }>({
@@ -24,39 +28,10 @@ export function FallingEffects() {
 
   useEffect(() => {
     let cancelled = false;
-    const cached = localStorage.getItem("animationSettings");
-    const cachedTime = localStorage.getItem("animationSettingsTime");
-    const now = Date.now();
-    const cacheValid = cached && cachedTime && now - Number(cachedTime) < 60 * 1000;
-
-    if (cacheValid) {
-      try {
-        const settings = JSON.parse(cached);
-        if (settings) {
-          const currentMonth = new Date().getMonth() + 1;
-          const isMonthInRange = (curr: number, from: number, to: number) => {
-            if (from <= to) return curr >= from && curr <= to;
-            return curr >= from || curr <= to;
-          };
-          const snowActive = settings.snow?.enabled && isMonthInRange(currentMonth, settings.snow.from, settings.snow.to);
-          const leavesActive = settings.leaves?.enabled && isMonthInRange(currentMonth, settings.leaves.from, settings.leaves.to);
-          setActiveEffects({ snow: snowActive, leaves: leavesActive });
-          return;
-        }
-      } catch {
-        // ignore parse errors
-      }
-    }
 
     getAnim()
       .then((settings) => {
         if (cancelled || !settings) return;
-        try {
-          localStorage.setItem("animationSettings", JSON.stringify(settings));
-          localStorage.setItem("animationSettingsTime", String(Date.now()));
-        } catch {
-          // ignore storage errors
-        }
         const currentMonth = new Date().getMonth() + 1;
         const isMonthInRange = (curr: number, from: number, to: number) => {
           if (from <= to) return curr >= from && curr <= to;
@@ -185,6 +160,10 @@ export function FallingEffects() {
       cancelAnimationFrame(animationFrameId);
     };
   }, [activeEffects]);
+
+  useEffect(() => {
+    onSnowChange?.(activeEffects.snow);
+  }, [activeEffects.snow, onSnowChange]);
 
   if (!activeEffects.snow && !activeEffects.leaves) return null;
 

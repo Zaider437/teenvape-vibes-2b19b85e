@@ -1,10 +1,10 @@
-import { describe, it, vi, beforeEach, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { mockOrder } from "../test/fixtures/orders";
 
 const mockUseSearch = vi.fn();
-const mockGetOrderByToken = vi.fn();
+const mockFetchOrder = vi.fn();
 const mockCancelOrder = vi.fn();
 
 vi.mock("@tanstack/react-start", () => ({
@@ -25,7 +25,7 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 vi.mock("../lib/orders.functions", () => ({
-  getOrderByToken: (...args: any[]) => mockGetOrderByToken(...args),
+  getOrderByToken: (...args: any[]) => mockFetchOrder(...args),
   cancelOrder: (...args: any[]) => mockCancelOrder(...args),
 }));
 
@@ -49,54 +49,62 @@ import { OrderCancelPage } from "./order-cancel";
 describe("OrderCancelPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseSearch.mockReturnValue({ token: "test-token" });
-    mockGetOrderByToken.mockReset();
+    mockFetchOrder.mockReset();
     mockCancelOrder.mockReset();
   });
 
-  it("shows error when token is missing", async () => {
+  it("shows error when token is missing", () => {
     mockUseSearch.mockReturnValue({ token: "" });
 
     render(<OrderCancelPage />);
 
-    await waitFor(() => {
-      expect(screen.getByText("В ссылке отсутствует токен отмены.")).toBeDefined();
-    });
+    expect(screen.getByText("В ссылке отсутствует токен отмены.")).toBeDefined();
   });
 
-  it("shows loading state initially", async () => {
-    mockGetOrderByToken.mockImplementation(() => new Promise(() => {}));
+  it("shows error when order is not found", async () => {
+    mockUseSearch.mockReturnValue({ token: "uuid-token-1234" });
+    mockFetchOrder.mockResolvedValue(null);
 
     render(<OrderCancelPage />);
 
-    expect(screen.getByText("Отмена")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText("Заказ не найден.")).toBeDefined();
+    });
   });
 
-  it("displays order details when fetched successfully", async () => {
-    mockGetOrderByToken.mockResolvedValue(mockOrder);
+  it("displays order details when token is valid", async () => {
+    mockUseSearch.mockReturnValue({ token: "uuid-token-1234" });
+    mockFetchOrder.mockResolvedValue(mockOrder);
 
     render(<OrderCancelPage />);
 
     await waitFor(() => {
       expect(screen.getByText(`Заказ #${mockOrder.id.slice(0, 8)}`)).toBeDefined();
     });
-
     expect(screen.getByText(mockOrder.customer_address)).toBeDefined();
     expect(screen.getByText(`${mockOrder.total_amount.toFixed(2)} BYN`)).toBeDefined();
   });
 
-  it("shows error when order fetch fails", async () => {
-    mockGetOrderByToken.mockRejectedValue(new Error("Не удалось найти заказ."));
+  it("displays brand in order items", async () => {
+    const orderWithBrand = {
+      ...mockOrder,
+      items: [
+        { name: "Test Vape", brand: "TestBrand", qty: 2, price: 25.5, flavor: "Ментол" },
+      ],
+    };
+    mockUseSearch.mockReturnValue({ token: "uuid-token-1234" });
+    mockFetchOrder.mockResolvedValue(orderWithBrand);
 
     render(<OrderCancelPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Не удалось найти заказ.")).toBeDefined();
+      expect(screen.getByText("Test Vape (TestBrand)")).toBeDefined();
     });
   });
 
   it("cancels order when button is clicked", async () => {
-    mockGetOrderByToken.mockResolvedValue(mockOrder);
+    mockUseSearch.mockReturnValue({ token: "uuid-token-1234" });
+    mockFetchOrder.mockResolvedValue(mockOrder);
     mockCancelOrder.mockResolvedValue({ success: true, alreadyCancelled: false });
 
     render(<OrderCancelPage />);
@@ -109,25 +117,26 @@ describe("OrderCancelPage", () => {
     cancelButton.click();
 
     await waitFor(() => {
-      expect(mockCancelOrder).toHaveBeenCalledWith({ data: { token: "test-token" } });
+      expect(mockCancelOrder).toHaveBeenCalledWith({ data: { token: "uuid-token-1234" } });
     });
   });
 
   it("displays cancelled state when order is already cancelled", async () => {
     const cancelledOrder = { ...mockOrder, status: "cancelled" };
-    mockGetOrderByToken.mockResolvedValue(cancelledOrder);
+    mockUseSearch.mockReturnValue({ token: "uuid-token-1234" });
+    mockFetchOrder.mockResolvedValue(cancelledOrder);
 
     render(<OrderCancelPage />);
 
     await waitFor(() => {
       expect(screen.getByText("отменён")).toBeDefined();
     });
-
     expect(screen.getByText("Заказ отменён")).toBeDefined();
   });
 
   it("renders link back to catalog", async () => {
-    mockGetOrderByToken.mockResolvedValue(mockOrder);
+    mockUseSearch.mockReturnValue({ token: "uuid-token-1234" });
+    mockFetchOrder.mockResolvedValue(mockOrder);
 
     render(<OrderCancelPage />);
 

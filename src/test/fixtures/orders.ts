@@ -4,8 +4,8 @@ export const mockOrder = {
   customer_address: "18:00",
   customer_note: "Сдача не нужна",
   items: [
-    { name: "Test Disposable Vape", qty: 2, price: 25.5 },
-    { name: "Test Pod Device", qty: 1, price: 65.0 },
+    { name: "Test Disposable Vape", brand: "TestBrand", qty: 2, price: 25.5 },
+    { name: "Test Pod Device", brand: "TestBrand", qty: 1, price: 65.0 },
   ],
   total_amount: 116.0,
   status: "new",

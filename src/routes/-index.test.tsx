@@ -170,4 +170,28 @@ describe("Shop Component", () => {
       consoleSpy.mockRestore();
     }
   });
+
+  it("renders the Telegram chat button with correct link", async () => {
+    render(
+      <CartProvider>
+        <Shop />
+      </CartProvider>
+    );
+
+    const chatLink = screen.getByRole("link", { name: /Чат Telegram/i });
+    expect(chatLink).toBeDefined();
+    expect(chatLink).toHaveAttribute("href", "https://t.me/+uEve7WOFVxpmM2Ey");
+  });
+
+  it("renders the Telegram contact button with correct link", async () => {
+    render(
+      <CartProvider>
+        <Shop />
+      </CartProvider>
+    );
+
+    const contactLink = screen.getByRole("link", { name: /Связь с нами в Telegram/i });
+    expect(contactLink).toBeDefined();
+    expect(contactLink).toHaveAttribute("href", "https://t.me/Love_Vape1");
+  });
 });
