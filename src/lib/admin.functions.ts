@@ -31,7 +31,9 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 
   if (!isAuthorized) {
     try {
-      const { data: userRes, error: userErr } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+      const { data: userRes, error: userErr } = await supabaseAdmin.auth.admin.getUserById(
+        context.userId,
+      );
       if (!userErr && userRes?.user) {
         const username = userRes.user.user_metadata?.telegram_username;
         if (username) {
@@ -40,7 +42,9 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
             { _username: username },
           );
           if (!whitelistErr && allowed) {
-            console.log(`[assertAdmin] Bypassed role check for whitelisted Telegram user: @${username}`);
+            console.log(
+              `[assertAdmin] Bypassed role check for whitelisted Telegram user: @${username}`,
+            );
             isAuthorized = true;
           }
         }
@@ -137,7 +141,10 @@ export const adminDeleteProduct = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("products" as any).delete().eq("id", data.id);
+    const { error } = await supabaseAdmin
+      .from("products" as any)
+      .delete()
+      .eq("id", data.id);
     if (error) throw error;
     return { ok: true };
   });
@@ -161,12 +168,14 @@ export const adminToggleStock = createServerFn({ method: "POST" })
 export const adminMoveOrCopyProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({
-      id: z.string(),
-      targetCategory: z.string().trim().min(1),
-      targetSubcategory: z.string().trim().max(1000).optional().nullable(),
-      mode: z.enum(["move", "copy"]),
-    }).parse(input),
+    z
+      .object({
+        id: z.string(),
+        targetCategory: z.string().trim().min(1),
+        targetSubcategory: z.string().trim().max(1000).optional().nullable(),
+        mode: z.enum(["move", "copy"]),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
@@ -194,25 +203,23 @@ export const adminMoveOrCopyProduct = createServerFn({ method: "POST" })
     if (!source) throw new Error("Товар не найден");
 
     const src = source as any;
-    const { error: insertError } = await supabaseAdmin
-      .from("products" as any)
-      .insert({
-        slug: src.slug,
-        name: "Копия: " + src.name,
-        brand: src.brand,
-        category: data.targetCategory,
-        subcategory: targetSubcategory ?? src.subcategory,
-        price: src.price,
-        flavor: src.flavor,
-        puffs: src.puffs,
-        volume: src.volume,
-        emoji: src.emoji,
-        color: src.color,
-        image_url: src.image_url,
-        description: src.description,
-        in_stock: src.in_stock,
-        sort_order: src.sort_order,
-      });
+    const { error: insertError } = await supabaseAdmin.from("products" as any).insert({
+      slug: src.slug,
+      name: "Копия: " + src.name,
+      brand: src.brand,
+      category: data.targetCategory,
+      subcategory: targetSubcategory ?? src.subcategory,
+      price: src.price,
+      flavor: src.flavor,
+      puffs: src.puffs,
+      volume: src.volume,
+      emoji: src.emoji,
+      color: src.color,
+      image_url: src.image_url,
+      description: src.description,
+      in_stock: src.in_stock,
+      sort_order: src.sort_order,
+    });
     if (insertError) throw insertError;
     return { ok: true, mode: "copy" };
   });
@@ -317,12 +324,10 @@ export const adminUpdateMeetingTimes = createServerFn({ method: "POST" })
         .eq("telegram_username", "__meeting_times__");
       if (error) throw error;
     } else {
-      const { error } = await context.supabase
-        .from("admin_telegram_users" as any)
-        .insert({
-          telegram_username: "__meeting_times__",
-          note: JSON.stringify(data.times),
-        });
+      const { error } = await context.supabase.from("admin_telegram_users" as any).insert({
+        telegram_username: "__meeting_times__",
+        note: JSON.stringify(data.times),
+      });
       if (error) throw error;
     }
     return { ok: true };
@@ -331,47 +336,58 @@ export const adminUpdateMeetingTimes = createServerFn({ method: "POST" })
 let cachedAnimationSettings: any = null;
 let cachedAnimationSettingsExpiry = 0;
 
-export const getAnimationSettings = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const now = Date.now();
-    if (cachedAnimationSettings && cachedAnimationSettingsExpiry > now) {
-      return cachedAnimationSettings;
-    }
+export const getAnimationSettings = createServerFn({ method: "GET" }).handler(async () => {
+  const now = Date.now();
+  if (cachedAnimationSettings && cachedAnimationSettingsExpiry > now) {
+    return cachedAnimationSettings;
+  }
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await (supabaseAdmin
-      .from("admin_telegram_users" as any)
-      .select("note")
-      .eq("telegram_username", "__animation_settings__")
-      .maybeSingle() as any);
-    if (error) {
-      console.error("Failed to fetch animation settings:", error);
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await (supabaseAdmin
+    .from("admin_telegram_users" as any)
+    .select("note")
+    .eq("telegram_username", "__animation_settings__")
+    .maybeSingle() as any);
+  if (error) {
+    console.error("Failed to fetch animation settings:", error);
+  }
+  let settings = {
+    leaves: { enabled: true, from: 9, to: 11 },
+    snow: { enabled: true, from: 12, to: 2 },
+  };
+  if (data && data.note) {
+    try {
+      settings = JSON.parse(data.note) as {
+        leaves: { enabled: boolean; from: number; to: number };
+        snow: { enabled: boolean; from: number; to: number };
+      };
+    } catch (e) {
+      console.error("Failed to parse animation settings:", e);
     }
-    let settings = {
-      leaves: { enabled: true, from: 9, to: 11 },
-      snow: { enabled: true, from: 12, to: 2 }
-    };
-    if (data && data.note) {
-      try {
-        settings = JSON.parse(data.note) as {
-          leaves: { enabled: boolean; from: number; to: number };
-          snow: { enabled: boolean; from: number; to: number };
-        };
-      } catch (e) {
-        console.error("Failed to parse animation settings:", e);
-      }
-    }
-    cachedAnimationSettings = settings;
-    cachedAnimationSettingsExpiry = now + 60 * 1000; // Cache for 1 minute
-    return settings;
-  });
+  }
+  cachedAnimationSettings = settings;
+  cachedAnimationSettingsExpiry = now + 60 * 1000; // Cache for 1 minute
+  return settings;
+});
 
 export const adminUpdateAnimationSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({
-    leaves: z.object({ enabled: z.boolean(), from: z.number().min(1).max(12), to: z.number().min(1).max(12) }),
-    snow: z.object({ enabled: z.boolean(), from: z.number().min(1).max(12), to: z.number().min(1).max(12) })
-  }).parse(input))
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        leaves: z.object({
+          enabled: z.boolean(),
+          from: z.number().min(1).max(12),
+          to: z.number().min(1).max(12),
+        }),
+        snow: z.object({
+          enabled: z.boolean(),
+          from: z.number().min(1).max(12),
+          to: z.number().min(1).max(12),
+        }),
+      })
+      .parse(input),
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
 
@@ -388,12 +404,10 @@ export const adminUpdateAnimationSettings = createServerFn({ method: "POST" })
         .eq("telegram_username", "__animation_settings__");
       if (error) throw error;
     } else {
-      const { error } = await context.supabase
-        .from("admin_telegram_users" as any)
-        .insert({
-          telegram_username: "__animation_settings__",
-          note: JSON.stringify(data),
-        });
+      const { error } = await context.supabase.from("admin_telegram_users" as any).insert({
+        telegram_username: "__animation_settings__",
+        note: JSON.stringify(data),
+      });
       if (error) throw error;
     }
 
@@ -402,4 +416,3 @@ export const adminUpdateAnimationSettings = createServerFn({ method: "POST" })
     cachedAnimationSettingsExpiry = Date.now() + 60 * 1000;
     return { ok: true };
   });
-

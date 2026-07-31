@@ -20,7 +20,11 @@ vi.mock("@tanstack/react-start", () => ({
 
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => () => ({}),
-  Link: ({ to, children, ...props }: any) => <a href={to} {...props}>{children}</a>,
+  Link: ({ to, children, ...props }: any) => (
+    <a href={to} {...props}>
+      {children}
+    </a>
+  ),
   useSearch: (options: any) => mockUseSearch(options),
 }));
 
@@ -88,9 +92,7 @@ describe("OrderCancelPage", () => {
   it("displays brand in order items", async () => {
     const orderWithBrand = {
       ...mockOrder,
-      items: [
-        { name: "Test Vape", brand: "TestBrand", qty: 2, price: 25.5, flavor: "Ментол" },
-      ],
+      items: [{ name: "Test Vape", brand: "TestBrand", qty: 2, price: 25.5, flavor: "Ментол" }],
     };
     mockUseSearch.mockReturnValue({ token: "uuid-token-1234" });
     mockFetchOrder.mockResolvedValue(orderWithBrand);

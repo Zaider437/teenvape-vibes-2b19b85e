@@ -3,7 +3,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { getTelegramLoginConfig, telegramLogin, type TelegramAuthData } from "@/lib/telegram-auth.functions";
+import {
+  getTelegramLoginConfig,
+  telegramLogin,
+  type TelegramAuthData,
+} from "@/lib/telegram-auth.functions";
 import { z } from "zod";
 
 declare global {
@@ -52,19 +56,26 @@ function AdminLogin() {
   useEffect(() => {
     // If already signed in — go straight to /admin.
     try {
-      const hasSession = typeof window !== "undefined" && Object.keys(localStorage).some(k => k.startsWith("sb-") && k.endsWith("-auth-token"));
+      const hasSession =
+        typeof window !== "undefined" &&
+        Object.keys(localStorage).some((k) => k.startsWith("sb-") && k.endsWith("-auth-token"));
       if (hasSession) {
-        supabase.auth.getUser().then(({ data }) => {
-          if (data?.user) navigate({ to: "/admin", replace: true });
-        }).catch((err) => {
-          console.warn("[admin-login] Supabase auth check failed:", err);
-        });
+        supabase.auth
+          .getUser()
+          .then(({ data }) => {
+            if (data?.user) navigate({ to: "/admin", replace: true });
+          })
+          .catch((err) => {
+            console.warn("[admin-login] Supabase auth check failed:", err);
+          });
       }
     } catch (err) {
       console.warn("[admin-login] Supabase auth check crashed:", err);
     }
 
-    getConfig().then((cfg) => setBotUsername(cfg.botUsername)).catch(() => {});
+    getConfig()
+      .then((cfg) => setBotUsername(cfg.botUsername))
+      .catch(() => {});
   }, [navigate]);
 
   useEffect(() => {
@@ -95,7 +106,7 @@ function AdminLogin() {
     script.setAttribute("data-userpic", "true");
     script.setAttribute("data-request-access", "write");
     script.setAttribute("data-onauth", "onTelegramAuth(user)");
-    
+
     const container = containerRef.current;
     container.appendChild(script);
 
@@ -115,14 +126,18 @@ function AdminLogin() {
         <div className="font-display text-3xl">
           <span className="text-primary">Love</span>Vape
         </div>
-        <div className="text-xs uppercase tracking-widest text-muted-foreground">Админка каталога</div>
+        <div className="text-xs uppercase tracking-widest text-muted-foreground">
+          Админка каталога
+        </div>
         <p className="text-sm text-muted-foreground">
           Войдите через Telegram. Пускаем только тех, чей @username добавлен в белый список.
         </p>
         {showPasswordForm ? (
           <form onSubmit={handlePasswordLogin} className="space-y-3 text-left">
             <div>
-              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Email</label>
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                Email
+              </label>
               <input
                 type="email"
                 value={email}
@@ -133,7 +148,9 @@ function AdminLogin() {
               />
             </div>
             <div>
-              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Пароль</label>
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                Пароль
+              </label>
               <input
                 type="password"
                 value={password}
@@ -176,7 +193,8 @@ function AdminLogin() {
         )}
 
         <p className="text-[10px] text-muted-foreground">
-          Если кнопка не появляется — убедитесь, что домен добавлен у @BotFather (/setdomain для {botUsername || "бота"}).
+          Если кнопка не появляется — убедитесь, что домен добавлен у @BotFather (/setdomain для{" "}
+          {botUsername || "бота"}).
         </p>
       </div>
     </div>

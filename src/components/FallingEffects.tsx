@@ -37,8 +37,12 @@ export function FallingEffects({ onSnowChange }: FallingEffectsProps) {
           if (from <= to) return curr >= from && curr <= to;
           return curr >= from || curr <= to;
         };
-        const snowActive = settings.snow.enabled && isMonthInRange(currentMonth, settings.snow.from, settings.snow.to);
-        const leavesActive = settings.leaves.enabled && isMonthInRange(currentMonth, settings.leaves.from, settings.leaves.to);
+        const snowActive =
+          settings.snow.enabled &&
+          isMonthInRange(currentMonth, settings.snow.from, settings.snow.to);
+        const leavesActive =
+          settings.leaves.enabled &&
+          isMonthInRange(currentMonth, settings.leaves.from, settings.leaves.to);
         setActiveEffects({ snow: snowActive, leaves: leavesActive });
       })
       .catch((err) => {
@@ -58,7 +62,7 @@ export function FallingEffects({ onSnowChange }: FallingEffectsProps) {
     if (!ctx) return;
 
     let animationFrameId: number;
-    let particles: Particle[] = [];
+    const particles: Particle[] = [];
 
     const resizeCanvas = () => {
       const dpr = window.devicePixelRatio || 1;
@@ -77,9 +81,14 @@ export function FallingEffects({ onSnowChange }: FallingEffectsProps) {
     const leafColors = ["#e28743", "#eab676", "#abdbe3", "#ee6c4d", "#f9c74f", "#90be6d"];
 
     const createParticle = (initY = false): Particle => {
-      const type = activeEffects.snow && activeEffects.leaves
-        ? (Math.random() > 0.5 ? "snow" : "leaf")
-        : (activeEffects.snow ? "snow" : "leaf");
+      const type =
+        activeEffects.snow && activeEffects.leaves
+          ? Math.random() > 0.5
+            ? "snow"
+            : "leaf"
+          : activeEffects.snow
+            ? "snow"
+            : "leaf";
 
       const x = Math.random() * window.innerWidth;
       const y = initY ? Math.random() * window.innerHeight : -10;

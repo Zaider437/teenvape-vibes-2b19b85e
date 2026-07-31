@@ -20,7 +20,7 @@ describe("escapeHtml", () => {
 
   it("escapes mixed special characters", () => {
     expect(escapeHtml('<a href="test">It\'s working</a>')).toBe(
-      "&lt;a href=&quot;test&quot;&gt;It&#39;s working&lt;/a&gt;"
+      "&lt;a href=&quot;test&quot;&gt;It&#39;s working&lt;/a&gt;",
     );
   });
 

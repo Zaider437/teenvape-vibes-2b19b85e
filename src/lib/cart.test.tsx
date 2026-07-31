@@ -38,7 +38,7 @@ describe("Cart Context & Hook", () => {
 
   it("throws an error when useCart is used outside CartProvider", () => {
     // Suppress console.error for this test to keep output clean
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(() => renderHook(() => useCart())).toThrow("useCart outside provider");
     consoleSpy.mockRestore();
   });

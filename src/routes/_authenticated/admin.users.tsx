@@ -77,13 +77,16 @@ function WhitelistAdmin() {
       <Toaster position="top-center" theme="dark" richColors />
       <h1 className="font-display text-2xl">Доступы</h1>
       <p className="text-sm text-muted-foreground">
-        Здесь список Telegram-аккаунтов, которые могут войти в админку. Добавляйте по @username (без @).
+        Здесь список Telegram-аккаунтов, которые могут войти в админку. Добавляйте по @username (без
+        @).
       </p>
 
       <form onSubmit={submit} className="bg-card border border-border rounded-xl p-3 space-y-2">
         <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
           <label className="block">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">@username</span>
+            <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              @username
+            </span>
             <input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -92,7 +95,9 @@ function WhitelistAdmin() {
             />
           </label>
           <label className="block">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Заметка (кто это)</span>
+            <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              Заметка (кто это)
+            </span>
             <input
               value={note}
               onChange={(e) => setNote(e.target.value)}
@@ -100,7 +105,10 @@ function WhitelistAdmin() {
               className="mt-1 w-full bg-background border-2 border-border rounded-xl px-3 py-2.5 text-sm"
             />
           </label>
-          <button type="submit" className="h-11 px-4 bg-primary text-primary-foreground font-bold rounded-xl flex items-center gap-1.5">
+          <button
+            type="submit"
+            className="h-11 px-4 bg-primary text-primary-foreground font-bold rounded-xl flex items-center gap-1.5"
+          >
             <Plus className="w-4 h-4" /> Добавить
           </button>
         </div>
@@ -111,12 +119,19 @@ function WhitelistAdmin() {
       ) : (
         <div className="grid gap-2">
           {rows.map((row) => (
-            <div key={row.id} className="bg-card border border-border rounded-xl p-3 flex items-center gap-3">
+            <div
+              key={row.id}
+              className="bg-card border border-border rounded-xl p-3 flex items-center gap-3"
+            >
               <div className="min-w-0 flex-1">
                 <div className="font-bold">@{row.telegram_username}</div>
-                {row.note && <div className="text-xs text-muted-foreground truncate">{row.note}</div>}
+                {row.note && (
+                  <div className="text-xs text-muted-foreground truncate">{row.note}</div>
+                )}
                 {row.telegram_id && (
-                  <div className="text-[10px] text-muted-foreground">Telegram ID: {row.telegram_id}</div>
+                  <div className="text-[10px] text-muted-foreground">
+                    Telegram ID: {row.telegram_id}
+                  </div>
                 )}
               </div>
               {row.telegram_id && (
@@ -133,7 +148,8 @@ function WhitelistAdmin() {
         </div>
       )}
       <p className="text-[10px] text-muted-foreground">
-        Кнопки удаления убраны, так как эти функции отвечают за настройку анимации и редактирование корзины.
+        Кнопки удаления убраны, так как эти функции отвечают за настройку анимации и редактирование
+        корзины.
       </p>
     </div>
   );

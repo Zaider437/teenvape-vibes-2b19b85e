@@ -181,15 +181,15 @@ export function Shop({ snowActive }: { snowActive?: boolean }) {
       <div className="px-3 sm:px-4 mt-2 sm:mt-3">
         <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1.5 sm:pb-2 -mx-3 sm:-mx-4 px-3 sm:px-4 snap-x">
           {dynamicCategories.map((c) => (
-<button
-                key={c.id}
-                onClick={() => selectCategory(c.id)}
-                className={`snap-start shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all ${
-                  category === c.id
-                    ? "bg-primary text-primary-foreground border-primary glow-pink"
-                    : "bg-card text-foreground border-border hover:border-primary/60"
-                }`}
-              >
+            <button
+              key={c.id}
+              onClick={() => selectCategory(c.id)}
+              className={`snap-start shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all ${
+                category === c.id
+                  ? "bg-primary text-primary-foreground border-primary glow-pink"
+                  : "bg-card text-foreground border-border hover:border-primary/60"
+              }`}
+            >
               <span className="mr-1">{c.emoji}</span>
               {c.label}
             </button>
@@ -295,26 +295,26 @@ function SubFilterRow({
         {label}
       </div>
       <div className="flex gap-1 sm:gap-1.5 overflow-x-auto pb-1 -mx-3 sm:-mx-4 px-3 sm:px-4 snap-x">
-<button
-              onClick={() => onChange("all")}
-              className={`snap-start shrink-0 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
-                value === "all"
-                  ? "bg-secondary text-secondary-foreground border-secondary"
-                  : "bg-card text-muted-foreground border-border hover:border-secondary/60"
-              }`}
-            >
-              Все
-            </button>
-{options.map((opt) => (
-            <button
-              key={opt}
-              onClick={() => onChange(opt)}
-              className={`snap-start shrink-0 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
-                value === opt
-                  ? "bg-secondary text-secondary-foreground border-secondary"
-                  : "bg-card text-muted-foreground border-border hover:border-secondary/60"
-              }`}
-            >
+        <button
+          onClick={() => onChange("all")}
+          className={`snap-start shrink-0 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
+            value === "all"
+              ? "bg-secondary text-secondary-foreground border-secondary"
+              : "bg-card text-muted-foreground border-border hover:border-secondary/60"
+          }`}
+        >
+          Все
+        </button>
+        {options.map((opt) => (
+          <button
+            key={opt}
+            onClick={() => onChange(opt)}
+            className={`snap-start shrink-0 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
+              value === opt
+                ? "bg-secondary text-secondary-foreground border-secondary"
+                : "bg-card text-muted-foreground border-border hover:border-secondary/60"
+            }`}
+          >
             {opt}
           </button>
         ))}
@@ -332,7 +332,10 @@ function Header({ onOpenCart, snowActive }: { onOpenCart: () => void; snowActive
           <div className="h-8 sm:h-11 flex items-center relative">
             <LoveVapeLogo className="h-7 sm:h-9 w-auto" />
             {snowActive && (
-              <span className="absolute -top-1 -right-1 text-base animate-bounce" aria-hidden="true">
+              <span
+                className="absolute -top-1 -right-1 text-base animate-bounce"
+                aria-hidden="true"
+              >
                 🎄
               </span>
             )}
@@ -490,7 +493,9 @@ function ProductCard({ product, onOpen }: { product: Product; onOpen: (p: Produc
             onClick={() => {
               if (out) return;
               add(product);
-              toast.success(`${product.name}${product.flavor ? ` (${product.flavor})` : ""} в корзине`);
+              toast.success(
+                `${product.name}${product.flavor ? ` (${product.flavor})` : ""} в корзине`,
+              );
             }}
             disabled={out}
             className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg grid place-items-center bg-primary text-primary-foreground glow-soft active:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -829,13 +834,14 @@ function CheckoutSheet({ onClose }: { onClose: () => void }) {
                 Заказ
               </div>
               {items.map((i) => (
-                  <div key={i.product.id} className="flex justify-between text-sm py-0.5">
-                    <span className="truncate mr-2">
-                      {i.product.brand} — {i.product.name}{i.product.flavor ? `, ${i.product.flavor}` : ""} × {i.qty}
-                    </span>
-                    <span className="font-bold shrink-0">{(i.product.price * i.qty).toFixed(2)}</span>
-                  </div>
-                ))}
+                <div key={i.product.id} className="flex justify-between text-sm py-0.5">
+                  <span className="truncate mr-2">
+                    {i.product.brand} — {i.product.name}
+                    {i.product.flavor ? `, ${i.product.flavor}` : ""} × {i.qty}
+                  </span>
+                  <span className="font-bold shrink-0">{(i.product.price * i.qty).toFixed(2)}</span>
+                </div>
+              ))}
               <div className="mt-2 pt-2 border-t border-border flex justify-between font-display text-xl">
                 <span>Итого</span>
                 <span className="text-primary">{total.toFixed(2)} BYN</span>

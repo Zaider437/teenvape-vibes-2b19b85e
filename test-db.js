@@ -1,15 +1,15 @@
-import postgres from 'postgres';
+import postgres from "postgres";
 
 async function testConnection() {
   console.log("Connecting to Supabase Postgres via Pooler...");
   const sql = postgres({
-    host: 'aws-0-eu-central-1.pooler.supabase.com',
+    host: "aws-0-eu-central-1.pooler.supabase.com",
     port: 6543,
-    database: 'postgres',
-    username: 'postgres.ueazjqvxjlppgtkhcmut',
-    password: 'Ars4655789023',
-    ssl: 'require',
-    connect_timeout: 10
+    database: "postgres",
+    username: "postgres.ueazjqvxjlppgtkhcmut",
+    password: "Ars4655789023",
+    ssl: "require",
+    connect_timeout: 10,
   });
   try {
     const result = await sql`SELECT NOW()`;

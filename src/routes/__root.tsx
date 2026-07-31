@@ -78,17 +78,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "LoveVape — вейпы, поды и жидкости" },
-      { name: "description", content: "LoveVape: одноразки, POD-системы и жидкости. Доставка по городу, оплата при получении." },
+      {
+        name: "description",
+        content:
+          "LoveVape: одноразки, POD-системы и жидкости. Доставка по городу, оплата при получении.",
+      },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "LoveVape — вейпы, поды и жидкости" },
-      { property: "og:description", content: "LoveVape: одноразки, POD-системы и жидкости. Доставка по городу, оплата при получении." },
+      {
+        property: "og:description",
+        content:
+          "LoveVape: одноразки, POD-системы и жидкости. Доставка по городу, оплата при получении.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "LoveVape — вейпы, поды и жидкости" },
-      { name: "twitter:description", content: "LoveVape: одноразки, POD-системы и жидкости. Доставка по городу, оплата при получении." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/aOj6VswugZPjGFF0ixDCmkXwoQ93/social-images/social-1783014430667-5345921827873692882.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/aOj6VswugZPjGFF0ixDCmkXwoQ93/social-images/social-1783014430667-5345921827873692882.webp" },
+      {
+        name: "twitter:description",
+        content:
+          "LoveVape: одноразки, POD-системы и жидкости. Доставка по городу, оплата при получении.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/aOj6VswugZPjGFF0ixDCmkXwoQ93/social-images/social-1783014430667-5345921827873692882.webp",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/aOj6VswugZPjGFF0ixDCmkXwoQ93/social-images/social-1783014430667-5345921827873692882.webp",
+      },
     ],
     links: [
       {
@@ -123,7 +143,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
               "@type": "Organization",
               name: "LoveVape",
               url: "/",
-              description: "LoveVape: одноразки, POD-системы и жидкости. Доставка по городу, оплата при получении. 18+.",
+              description:
+                "LoveVape: одноразки, POD-системы и жидкости. Доставка по городу, оплата при получении. 18+.",
             },
           ],
         }),

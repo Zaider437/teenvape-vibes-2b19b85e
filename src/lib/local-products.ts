@@ -13,7 +13,7 @@ export const localProducts = [
     color: "cyan",
     image: null,
     in_stock: true,
-    sort_order: 10
+    sort_order: 10,
   },
   {
     id: "d2",
@@ -29,7 +29,7 @@ export const localProducts = [
     color: "pink",
     image: null,
     in_stock: true,
-    sort_order: 20
+    sort_order: 20,
   },
   {
     id: "d3",
@@ -45,7 +45,7 @@ export const localProducts = [
     color: "lime",
     image: null,
     in_stock: true,
-    sort_order: 30
+    sort_order: 30,
   },
   {
     id: "v1-pink",
@@ -61,7 +61,7 @@ export const localProducts = [
     color: "pink",
     image: null,
     in_stock: true,
-    sort_order: 110
+    sort_order: 110,
   },
   {
     id: "v1-green",
@@ -77,7 +77,7 @@ export const localProducts = [
     color: "lime",
     image: null,
     in_stock: true,
-    sort_order: 111
+    sort_order: 111,
   },
   {
     id: "v4-silver",
@@ -93,7 +93,7 @@ export const localProducts = [
     color: "cyan",
     image: null,
     in_stock: true,
-    sort_order: 140
+    sort_order: 140,
   },
   {
     id: "v5-red",
@@ -109,7 +109,7 @@ export const localProducts = [
     color: "pink",
     image: null,
     in_stock: true,
-    sort_order: 153
+    sort_order: 153,
   },
   {
     id: "l1",
@@ -125,7 +125,7 @@ export const localProducts = [
     color: "cyan",
     image: null,
     in_stock: true,
-    sort_order: 210
+    sort_order: 210,
   },
   {
     id: "l2",
@@ -141,7 +141,7 @@ export const localProducts = [
     color: "pink",
     image: null,
     in_stock: true,
-    sort_order: 220
+    sort_order: 220,
   },
   {
     id: "c2",
@@ -157,7 +157,7 @@ export const localProducts = [
     color: "pink",
     image: null,
     in_stock: true,
-    sort_order: 310
+    sort_order: 310,
   },
   {
     id: "c6",
@@ -173,6 +173,6 @@ export const localProducts = [
     color: "lime",
     image: null,
     in_stock: true,
-    sort_order: 341
-  }
+    sort_order: 341,
+  },
 ];

@@ -35,7 +35,14 @@ export function OrderCancelPage() {
     customer_name: string;
     customer_address: string;
     customer_note: string | null;
-    items: Array<{ name: string; brand: string; qty: number; price: number; flavor?: string | null; image?: string | null }>;
+    items: Array<{
+      name: string;
+      brand: string;
+      qty: number;
+      price: number;
+      flavor?: string | null;
+      image?: string | null;
+    }>;
     total_amount: number;
     status: string;
     created_at: string;

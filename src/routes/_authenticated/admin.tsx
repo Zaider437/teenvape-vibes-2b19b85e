@@ -29,7 +29,9 @@ function AdminLayout() {
           <div className="flex items-center justify-between gap-3">
             <div className="font-display text-xl">
               <span className="text-primary">Love</span>Vape
-              <span className="ml-2 text-xs uppercase tracking-widest text-muted-foreground">admin</span>
+              <span className="ml-2 text-xs uppercase tracking-widest text-muted-foreground">
+                admin
+              </span>
             </div>
             <button
               onClick={() => setMobileNavOpen(!mobileNavOpen)}
@@ -67,7 +69,10 @@ function AdminLayout() {
               <Clock className="w-4 h-4" /> Время встречи
             </Link>
             <button
-              onClick={() => { setMobileNavOpen(false); signOut(); }}
+              onClick={() => {
+                setMobileNavOpen(false);
+                signOut();
+              }}
               disabled={isSigningOut}
               className="ml-0 sm:ml-2 px-3 py-2 sm:py-1.5 rounded-lg text-sm font-semibold bg-muted hover:bg-muted/70 flex items-center gap-1.5 disabled:opacity-50 whitespace-nowrap min-h-[44px] sm:min-h-0 w-full sm:w-auto"
             >

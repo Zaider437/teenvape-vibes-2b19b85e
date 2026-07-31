@@ -1,4 +1,3 @@
-
 /**
  * @jest-environment jsdom
  */
@@ -82,7 +81,7 @@ describe("Shop Component", () => {
     const { container } = render(
       <CartProvider>
         <Shop />
-      </CartProvider>
+      </CartProvider>,
     );
 
     // Wait for products to load
@@ -100,7 +99,7 @@ describe("Shop Component", () => {
     render(
       <CartProvider>
         <Shop />
-      </CartProvider>
+      </CartProvider>,
     );
 
     await waitFor(() => {
@@ -113,9 +112,13 @@ describe("Shop Component", () => {
 
     await waitFor(() => {
       const elements = screen.queryAllByText("Test Disposable Vape");
-      const visibleElements = elements.filter(el => {
-        const card = el.closest('.bg-card');
-        return card && !card.classList.contains('hidden') && card.querySelector('button')?.textContent?.includes('В корзину');
+      const visibleElements = elements.filter((el) => {
+        const card = el.closest(".bg-card");
+        return (
+          card &&
+          !card.classList.contains("hidden") &&
+          card.querySelector("button")?.textContent?.includes("В корзину")
+        );
       });
       expect(visibleElements.length).toBe(0);
     });
@@ -127,7 +130,7 @@ describe("Shop Component", () => {
     render(
       <CartProvider>
         <Shop />
-      </CartProvider>
+      </CartProvider>,
     );
 
     await waitFor(() => {
@@ -141,9 +144,13 @@ describe("Shop Component", () => {
 
     await waitFor(() => {
       const elements = screen.queryAllByText("Test Disposable Vape");
-      const visibleElements = elements.filter(el => {
-        const card = el.closest('.bg-card');
-        return card && !card.classList.contains('hidden') && card.querySelector('button')?.textContent?.includes('В корзину');
+      const visibleElements = elements.filter((el) => {
+        const card = el.closest(".bg-card");
+        return (
+          card &&
+          !card.classList.contains("hidden") &&
+          card.querySelector("button")?.textContent?.includes("В корзину")
+        );
       });
       expect(visibleElements.length).toBe(0);
     });
@@ -160,7 +167,7 @@ describe("Shop Component", () => {
       render(
         <CartProvider>
           <Shop />
-        </CartProvider>
+        </CartProvider>,
       );
 
       await waitFor(() => {
@@ -175,7 +182,7 @@ describe("Shop Component", () => {
     render(
       <CartProvider>
         <Shop />
-      </CartProvider>
+      </CartProvider>,
     );
 
     const chatLink = screen.getByRole("link", { name: /Чат Telegram/i });
@@ -187,7 +194,7 @@ describe("Shop Component", () => {
     render(
       <CartProvider>
         <Shop />
-      </CartProvider>
+      </CartProvider>,
     );
 
     const contactLink = screen.getByRole("link", { name: /Связь с нами в Telegram/i });
