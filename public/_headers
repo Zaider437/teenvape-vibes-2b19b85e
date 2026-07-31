@@ -1,0 +1,5 @@
+/*.html
+  Content-Type: text/html; charset=utf-8
+
+/assets/*
+  cache-control: public, max-age=31536000, immutable

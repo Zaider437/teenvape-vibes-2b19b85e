@@ -36,6 +36,21 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   });
 }
 
+function ensureUtf8Charset(response: Response): Response {
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("text/html")) return response;
+  if (contentType.includes("charset=utf-8") || contentType.includes("charset=utf8")) {
+    return response;
+  }
+  const newHeaders = new Headers(response.headers);
+  newHeaders.set("content-type", "text/html; charset=utf-8");
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: newHeaders,
+  });
+}
+
 function isH3SwallowedErrorBody(body: string): boolean {
   try {
     const payload = JSON.parse(body) as { unhandled?: unknown; message?: unknown };
@@ -50,7 +65,8 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const normalized = await normalizeCatastrophicSsrResponse(response);
+      return ensureUtf8Charset(normalized);
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {
