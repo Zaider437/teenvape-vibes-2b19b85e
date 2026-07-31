@@ -1,0 +1,17 @@
+interface Env {
+  SUPABASE_PROJECT_ID: string;
+  SUPABASE_PUBLISHABLE_KEY: string;
+  SUPABASE_URL: string;
+  SUPABASE_SECRET_KEY: string;
+  SUPABASE_JWKS_URL: string;
+  VITE_SUPABASE_PROJECT_ID: string;
+  VITE_SUPABASE_PUBLISHABLE_KEY: string;
+  VITE_SUPABASE_URL: string;
+  DATABASE_URL: string;
+  TELEGRAM_API_KEY: string;
+  TELEGRAM_LOGIN_BOT_TOKEN: string;
+  TELEGRAM_CHAT_ID: string;
+  ADMIN_PASSWORD_SEED: string;
+  EMAIL_API_URL: string;
+  PUBLIC_IMAGE_CDN_BASE: string;
+}
