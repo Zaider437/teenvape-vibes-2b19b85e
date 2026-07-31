@@ -255,7 +255,7 @@ export const telegramLogin = createServerFn({ method: "POST" })
       getEnv("TELEGRAM_USER_EMAIL_DOMAIN") ||
       "telegram.teenvape.internal";
     const email = `tg_${data.id}@${emailDomain}`;
-    const password = await hmacSha256Hex(new TextEncoder().encode(seed), String(data.id)).slice(
+    const password = (await hmacSha256Hex(new TextEncoder().encode(seed), String(data.id))).slice(
       0,
       48,
     );
