@@ -172,6 +172,8 @@ export function Shop({ snowActive }: { snowActive?: boolean }) {
               aria-label="Очистить"
             >
               <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <X className="w-4 h-4" />
+>>>>>>> theirs
             </button>
           )}
         </div>
@@ -184,11 +186,28 @@ export function Shop({ snowActive }: { snowActive?: boolean }) {
             <button
               key={c.id}
               onClick={() => selectCategory(c.id)}
+<<<<<<< ours
               className={`snap-start shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all ${
                 category === c.id
                   ? "bg-primary text-primary-foreground border-primary glow-pink"
                   : "bg-card text-foreground border-border hover:border-primary/60"
               }`}
+=======
+              className="snap-start shrink-0 px-3 sm:px-4 py-2 sm:py-2 rounded-full border-2 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all min-h-[36px] inline-flex items-center"
+              style={
+                category === c.id
+                  ? {
+                      backgroundColor: "var(--color-primary)",
+                      color: "var(--color-primary-foreground)",
+                      borderColor: "var(--color-primary)",
+                    }
+                  : {
+                      backgroundColor: "var(--color-card)",
+                      color: "var(--color-foreground)",
+                      borderColor: "var(--color-border)",
+                    }
+              }
+>>>>>>> theirs
             >
               <span className="mr-1">{c.emoji}</span>
               {c.label}
@@ -291,6 +310,7 @@ function SubFilterRow({
 }) {
   return (
     <div>
+<<<<<<< ours
       <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 sm:mb-1.5">
         {label}
       </div>
@@ -302,6 +322,28 @@ function SubFilterRow({
               ? "bg-secondary text-secondary-foreground border-secondary"
               : "bg-card text-muted-foreground border-border hover:border-secondary/60"
           }`}
+=======
+      <div className="text-[10px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+        {label}
+      </div>
+      <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-3 sm:-mx-4 px-3 sm:px-4 snap-x">
+        <button
+          onClick={() => onChange("all")}
+          className="snap-start shrink-0 px-3 py-2 rounded-full text-xs font-semibold border transition-all min-h-[36px] inline-flex items-center"
+          style={
+            value === "all"
+              ? {
+                  backgroundColor: "var(--color-secondary)",
+                  color: "var(--color-secondary-foreground)",
+                  borderColor: "var(--color-secondary)",
+                }
+              : {
+                  backgroundColor: "var(--color-card)",
+                  color: "var(--color-muted-foreground)",
+                  borderColor: "var(--color-border)",
+                }
+          }
+>>>>>>> theirs
         >
           Все
         </button>
@@ -309,11 +351,28 @@ function SubFilterRow({
           <button
             key={opt}
             onClick={() => onChange(opt)}
+<<<<<<< ours
             className={`snap-start shrink-0 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
               value === opt
                 ? "bg-secondary text-secondary-foreground border-secondary"
                 : "bg-card text-muted-foreground border-border hover:border-secondary/60"
             }`}
+=======
+            className="snap-start shrink-0 px-3 py-2 rounded-full text-xs font-semibold border transition-all min-h-[36px] inline-flex items-center"
+            style={
+              value === opt
+                ? {
+                    backgroundColor: "var(--color-secondary)",
+                    color: "var(--color-secondary-foreground)",
+                    borderColor: "var(--color-secondary)",
+                  }
+                : {
+                    backgroundColor: "var(--color-card)",
+                    color: "var(--color-muted-foreground)",
+                    borderColor: "var(--color-border)",
+                  }
+            }
+>>>>>>> theirs
           >
             {opt}
           </button>
@@ -395,10 +454,17 @@ function Hero({ total }: { total: number }) {
       >
         <div className="absolute inset-0 bg-grid opacity-30 pointer-events-none" />
         <div className="relative">
+<<<<<<< ours
           <div className="inline-flex items-center gap-1 bg-primary/15 text-primary text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] sm:tracking-[0.25em] px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border border-primary/40 backdrop-blur">
             <Flame className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> new drop
           </div>
           <h1 className="mt-3 sm:mt-4 font-display text-[2.5rem] sm:text-[3.25rem] leading-[0.92] text-foreground">
+=======
+          <div className="inline-flex items-center gap-1 bg-primary/15 text-primary text-[10px] sm:text-[10px] font-bold uppercase tracking-[0.2em] sm:tracking-[0.25em] px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border border-primary/40 backdrop-blur">
+            <Flame className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> new drop
+          </div>
+          <h1 className="mt-3 sm:mt-4 font-display text-3xl sm:text-[3.25rem] leading-[0.92] text-foreground">
+>>>>>>> theirs
             LOVE THE
             <br />
             <span className="text-primary text-glow-pink">VAPE.</span>
@@ -408,7 +474,11 @@ function Hero({ total }: { total: number }) {
           </p>
           <a
             href="#catalog"
+<<<<<<< ours
             className="inline-flex items-center gap-2 mt-4 sm:mt-5 bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] sm:text-xs px-4 sm:px-6 py-2 sm:py-3 rounded-full glow-soft active:translate-y-0.5"
+=======
+            className="inline-flex items-center gap-2 mt-4 sm:mt-5 bg-primary text-primary-foreground font-black uppercase tracking-widest text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-full glow-soft active:translate-y-0.5 min-h-[40px]"
+>>>>>>> theirs
           >
             <Heart className="w-3 h-3 sm:w-4 sm:h-4 fill-current" /> к каталогу
           </a>
@@ -513,10 +583,17 @@ function FloatingCartBar({ onOpen }: { onOpen: () => void }) {
   const { count, total } = useCart();
   if (count === 0) return null;
   return (
+<<<<<<< ours
     <div className="fixed bottom-3 left-3 right-3 sm:left-4 sm:right-4 z-30">
       <button
         onClick={onOpen}
         className="w-full bg-primary text-primary-foreground rounded-xl sm:rounded-2xl py-2.5 sm:py-3.5 px-4 sm:px-5 flex items-center justify-between font-black uppercase tracking-widest text-xs sm:text-sm glow-pink"
+=======
+    <div className="fixed bottom-4 left-3 right-3 sm:left-4 sm:right-4 z-30">
+      <button
+        onClick={onOpen}
+        className="w-full bg-primary text-primary-foreground rounded-xl sm:rounded-2xl py-3 sm:py-3.5 px-4 sm:px-5 flex items-center justify-between font-black uppercase tracking-widest text-xs sm:text-sm glow-pink min-h-[48px]"
+>>>>>>> theirs
       >
         <span className="flex items-center gap-2">
           <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={3} />
@@ -569,7 +646,11 @@ function ProductDetail({ product }: { product: Product }) {
             toast.success(`${product.name} в корзине`);
           }}
           disabled={out}
+<<<<<<< ours
           className="mt-2 sm:mt-3 w-full bg-primary text-primary-foreground font-black uppercase tracking-widest py-2 sm:py-2.5 rounded-xl glow-soft disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
+=======
+          className="mt-2 sm:mt-3 w-full bg-primary text-primary-foreground font-black uppercase tracking-widest py-3 sm:py-2.5 rounded-xl glow-soft disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-xs"
+>>>>>>> theirs
         >
           {out ? "Нет в наличии" : "В корзину"}
         </button>
@@ -789,7 +870,11 @@ function CheckoutSheet({ onClose }: { onClose: () => void }) {
             </button>
           </div>
         ) : (
+<<<<<<< ours
           <form onSubmit={handleSubmit} className="p-4 space-y-3 overflow-y-auto">
+=======
+          <form onSubmit={handleSubmit} className="p-4 space-y-4 overflow-y-auto">
+>>>>>>> theirs
             <Field
               label="Юзернейм Telegram"
               value={telegram}

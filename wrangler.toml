@@ -1,5 +1,5 @@
 name = "zaider437-teenvape-vibes-2b19b85e"
-compatibility_date = "2025-07-01"
+compatibility_date = "2025-07-31"
 compatibility_flags = ["nodejs_compat"]
 main = ".output/server/index.mjs"
 

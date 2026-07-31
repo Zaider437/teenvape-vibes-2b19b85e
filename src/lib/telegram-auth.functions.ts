@@ -40,6 +40,48 @@ function getEnv(key: string): string | undefined {
   return undefined;
 }
 
+async function webCryptoSha256(message: string): Promise<ArrayBuffer> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+  return crypto.subtle.digest("SHA-256", data);
+}
+
+async function webCryptoHmacSha256(key: ArrayBuffer, message: string): Promise<ArrayBuffer> {
+  const encoder = new TextEncoder();
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    key,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const data = encoder.encode(message);
+  return crypto.subtle.sign("HMAC", cryptoKey, data);
+}
+
+function hexToUint8Array(hex: string): Uint8Array {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+  }
+  return bytes;
+}
+
+function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a[i] ^ b[i];
+  }
+  return result === 0;
+}
+
+function bufferToHex(buf: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 /** Public: bot username used by the Telegram Login Widget on /admin/login. */
 export const getTelegramLoginConfig = createServerFn({ method: "GET" }).handler(
   async ({ context }) => {
@@ -84,6 +126,7 @@ export type TelegramAuthData = z.infer<typeof authSchema>;
 export const telegramLogin = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => authSchema.parse(input))
   .handler(async ({ data, context }) => {
+<<<<<<< ours
     async function sha256Bytes(input: string): Promise<Uint8Array> {
       const encoder = new TextEncoder();
       const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(input));
@@ -122,6 +165,8 @@ export const telegramLogin = createServerFn({ method: "POST" })
       return bytes;
     }
 
+=======
+>>>>>>> theirs
     let env: any = (context as any)?.cloudflare?.env || (context as any)?.env || {};
     try {
       // @ts-expect-error - vinxi/http is resolved at runtime by TanStack Start/Nitro, but its type declarations might not be directly available in the local tsconfig
@@ -156,11 +201,18 @@ export const telegramLogin = createServerFn({ method: "POST" })
       .sort()
       .map((k) => `${k}=${rest[k]}`)
       .join("\n");
+<<<<<<< ours
     const secretBytes = await sha256Bytes(botToken);
     const computed = await hmacSha256Hex(secretBytes, dataCheckString);
     const computedBytes = hexToBytes(computed);
     const hashBytes = hexToBytes(hash);
     if (computedBytes.length !== hashBytes.length || !constantTimeEqual(computedBytes, hashBytes)) {
+=======
+    const secret = await webCryptoSha256(botToken);
+    const computed = await webCryptoHmacSha256(secret, dataCheckString);
+    const b = hexToUint8Array(hash);
+    if (computed.byteLength !== b.length || !timingSafeEqual(new Uint8Array(computed), b)) {
+>>>>>>> theirs
       const isDev = true;
       if (isDev) {
         console.warn(
@@ -213,10 +265,16 @@ export const telegramLogin = createServerFn({ method: "POST" })
       getEnv("TELEGRAM_USER_EMAIL_DOMAIN") ||
       "telegram.teenvape.internal";
     const email = `tg_${data.id}@${emailDomain}`;
+<<<<<<< ours
     const password = await hmacSha256Hex(new TextEncoder().encode(seed), String(data.id)).slice(
       0,
       48,
     );
+=======
+    const password = bufferToHex(
+      await webCryptoHmacSha256(new TextEncoder().encode(seed).buffer, String(data.id)),
+    ).slice(0, 48);
+>>>>>>> theirs
 
     const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
       email,

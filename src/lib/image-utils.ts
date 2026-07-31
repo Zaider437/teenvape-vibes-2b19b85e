@@ -8,6 +8,12 @@ function buildImageUrl(p: {
 }): string | null {
   if (p.image_url) return p.image_url;
 
+  const image = p.image || "";
+  if (image) {
+    const normalizedPath = image.startsWith("/") ? image.substring(1) : image;
+    return `/${normalizedPath}`;
+  }
+
   if (p.id) {
     const id = p.id;
     const lowerId = id.toLowerCase();
