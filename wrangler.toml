@@ -3,6 +3,10 @@ compatibility_date = "2025-07-31"
 compatibility_flags = ["nodejs_compat"]
 main = ".output/server/index.mjs"
 
+[build]
+command = "npm run build"
+cwd = "."
+
 [dev]
 port = 8087
 ip = "0.0.0.0"
