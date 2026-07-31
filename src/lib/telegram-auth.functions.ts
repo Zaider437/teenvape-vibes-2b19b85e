@@ -3,19 +3,19 @@ import { z } from "zod";
 
 function getEnv(key: string): string | undefined {
   if (key === "TELEGRAM_LOGIN_BOT_TOKEN") {
-    return process.env.TELEGRAM_LOGIN_BOT_TOKEN || (globalThis as any).TELEGRAM_LOGIN_BOT_TOKEN || (globalThis as any).env?.TELEGRAM_LOGIN_BOT_TOKEN || (globalThis as any).__env__?.TELEGRAM_LOGIN_BOT_TOKEN;
+    return (globalThis as any).TELEGRAM_LOGIN_BOT_TOKEN || (globalThis as any).env?.TELEGRAM_LOGIN_BOT_TOKEN || (globalThis as any).__env__?.TELEGRAM_LOGIN_BOT_TOKEN;
   }
   if (key === "TELEGRAM_API_KEY") {
-    return process.env.TELEGRAM_API_KEY || (globalThis as any).TELEGRAM_API_KEY || (globalThis as any).env?.TELEGRAM_API_KEY || (globalThis as any).__env__?.TELEGRAM_API_KEY;
+    return (globalThis as any).TELEGRAM_API_KEY || (globalThis as any).env?.TELEGRAM_API_KEY || (globalThis as any).__env__?.TELEGRAM_API_KEY;
   }
   if (key === "ADMIN_PASSWORD_SEED") {
-    return process.env.ADMIN_PASSWORD_SEED || (globalThis as any).ADMIN_PASSWORD_SEED || (globalThis as any).env?.ADMIN_PASSWORD_SEED || (globalThis as any).__env__?.ADMIN_PASSWORD_SEED;
+    return (globalThis as any).ADMIN_PASSWORD_SEED || (globalThis as any).env?.ADMIN_PASSWORD_SEED || (globalThis as any).__env__?.ADMIN_PASSWORD_SEED;
   }
   if (key === "TELEGRAM_LOGIN_BOT_USERNAME") {
-    return process.env.TELEGRAM_LOGIN_BOT_USERNAME || (globalThis as any).TELEGRAM_LOGIN_BOT_USERNAME || (globalThis as any).env?.TELEGRAM_LOGIN_BOT_USERNAME || (globalThis as any).__env__?.TELEGRAM_LOGIN_BOT_USERNAME;
+    return (globalThis as any).TELEGRAM_LOGIN_BOT_USERNAME || (globalThis as any).env?.TELEGRAM_LOGIN_BOT_USERNAME || (globalThis as any).__env__?.TELEGRAM_LOGIN_BOT_USERNAME;
   }
   if (key === "TELEGRAM_USER_EMAIL_DOMAIN") {
-    return process.env.TELEGRAM_USER_EMAIL_DOMAIN || (globalThis as any).TELEGRAM_USER_EMAIL_DOMAIN || (globalThis as any).env?.TELEGRAM_USER_EMAIL_DOMAIN || (globalThis as any).__env__?.TELEGRAM_USER_EMAIL_DOMAIN;
+    return (globalThis as any).TELEGRAM_USER_EMAIL_DOMAIN || (globalThis as any).env?.TELEGRAM_USER_EMAIL_DOMAIN || (globalThis as any).__env__?.TELEGRAM_USER_EMAIL_DOMAIN;
   }
   return undefined;
 }
@@ -58,7 +58,43 @@ export type TelegramAuthData = z.infer<typeof authSchema>;
 export const telegramLogin = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => authSchema.parse(input))
   .handler(async ({ data, context }) => {
-    const { createHmac, createHash, timingSafeEqual } = await import("node:crypto");
+    async function sha256Bytes(input: string): Promise<Uint8Array> {
+  const encoder = new TextEncoder();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(input));
+  return new Uint8Array(hashBuffer);
+}
+
+async function hmacSha256Hex(keyBytes: Uint8Array, message: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    keyBytes,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign("HMAC", cryptoKey, encoder.encode(message));
+  return Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function constantTimeEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a[i] ^ b[i];
+  }
+  return result === 0;
+}
+
+function hexToBytes(hex: string): Uint8Array {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+  }
+  return bytes;
+}
 
     let env: any = (context as any)?.cloudflare?.env || (context as any)?.env || {};
     try {
@@ -87,11 +123,11 @@ export const telegramLogin = createServerFn({ method: "POST" })
       .sort()
       .map((k) => `${k}=${rest[k]}`)
       .join("\n");
-    const secret = createHash("sha256").update(botToken).digest();
-    const computed = createHmac("sha256", secret).update(dataCheckString).digest("hex");
-    const a = Buffer.from(computed);
-    const b = Buffer.from(hash);
-    if (a.length !== b.length || !timingSafeEqual(a, b)) {
+    const secretBytes = await sha256Bytes(botToken);
+    const computed = await hmacSha256Hex(secretBytes, dataCheckString);
+    const computedBytes = hexToBytes(computed);
+    const hashBytes = hexToBytes(hash);
+    if (computedBytes.length !== hashBytes.length || !constantTimeEqual(computedBytes, hashBytes)) {
       const isDev = true;
       if (isDev) {
         console.warn("[tg-login] Telegram signature verification failed, but bypassing for development mode!");
@@ -136,7 +172,7 @@ export const telegramLogin = createServerFn({ method: "POST" })
     // 4) Provision/refresh Supabase user
     const emailDomain = env.TELEGRAM_USER_EMAIL_DOMAIN || getEnv("TELEGRAM_USER_EMAIL_DOMAIN") || "telegram.teenvape.internal";
     const email = `tg_${data.id}@${emailDomain}`;
-    const password = createHmac("sha256", seed).update(String(data.id)).digest("hex").slice(0, 48);
+    const password = await hmacSha256Hex(new TextEncoder().encode(seed), String(data.id)).slice(0, 48);
 
     const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
       email,

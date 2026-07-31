@@ -1,5 +1,5 @@
 name = "zaider437-teenvape-vibes-2b19b85e"
-compatibility_date = "2024-01-01"
+compatibility_date = "2025-07-01"
 compatibility_flags = ["nodejs_compat"]
 main = ".output/server/index.mjs"
 
@@ -25,9 +25,7 @@ TELEGRAM_API_KEY = "8777027201:AAFD8QYw5ita5wIzYFRJTS4LH75DF6eU1jo"
 TELEGRAM_LOGIN_BOT_TOKEN = "8777027201:AAFD8QYw5ita5wIzYFRJTS4LH75DF6eU1jo"
 TELEGRAM_CHAT_ID = "-1004456309860"
 ADMIN_PASSWORD_SEED = "lovevape-secure-seed-12345"
-SMTP_HOST = "smtp.gmail.com"
-SMTP_PORT = "587"
-SMTP_USER = "375333631370moroz@gmail.com"
-SMTP_PASS = "mhfaznumbjsdqgba"
+EMAIL_API_URL = ""
+PUBLIC_IMAGE_CDN_BASE = "https://ueazjqvxjlppgtkhcmut.supabase.co/storage/v1/object/public/product-images"
 
 

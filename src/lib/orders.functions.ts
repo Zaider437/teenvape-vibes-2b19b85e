@@ -7,7 +7,6 @@ const ordersCache = new Map<string, any>();
 function getEnv(key: string): string | undefined {
   if (key === "TELEGRAM_API_KEY") {
     return (
-      process.env.TELEGRAM_API_KEY ||
       (globalThis as any).TELEGRAM_API_KEY ||
       (globalThis as any).env?.TELEGRAM_API_KEY ||
       (globalThis as any).__env__?.TELEGRAM_API_KEY
@@ -15,7 +14,6 @@ function getEnv(key: string): string | undefined {
   }
   if (key === "TELEGRAM_CHAT_ID") {
     return (
-      process.env.TELEGRAM_CHAT_ID ||
       (globalThis as any).TELEGRAM_CHAT_ID ||
       (globalThis as any).env?.TELEGRAM_CHAT_ID ||
       (globalThis as any).__env__?.TELEGRAM_CHAT_ID
@@ -23,7 +21,6 @@ function getEnv(key: string): string | undefined {
   }
   if (key === "SMTP_HOST") {
     return (
-      process.env.SMTP_HOST ||
       (globalThis as any).SMTP_HOST ||
       (globalThis as any).env?.SMTP_HOST ||
       (globalThis as any).__env__?.SMTP_HOST
@@ -31,7 +28,6 @@ function getEnv(key: string): string | undefined {
   }
   if (key === "SMTP_PORT") {
     return (
-      process.env.SMTP_PORT ||
       (globalThis as any).SMTP_PORT ||
       (globalThis as any).env?.SMTP_PORT ||
       (globalThis as any).__env__?.SMTP_PORT
@@ -39,7 +35,6 @@ function getEnv(key: string): string | undefined {
   }
   if (key === "SMTP_USER") {
     return (
-      process.env.SMTP_USER ||
       (globalThis as any).SMTP_USER ||
       (globalThis as any).env?.SMTP_USER ||
       (globalThis as any).__env__?.SMTP_USER
@@ -47,7 +42,6 @@ function getEnv(key: string): string | undefined {
   }
   if (key === "SMTP_PASS") {
     return (
-      process.env.SMTP_PASS ||
       (globalThis as any).SMTP_PASS ||
       (globalThis as any).env?.SMTP_PASS ||
       (globalThis as any).__env__?.SMTP_PASS
@@ -55,7 +49,6 @@ function getEnv(key: string): string | undefined {
   }
   if (key === "NOTIFY_EMAIL") {
     return (
-      process.env.NOTIFY_EMAIL ||
       (globalThis as any).NOTIFY_EMAIL ||
       (globalThis as any).env?.NOTIFY_EMAIL ||
       (globalThis as any).__env__?.NOTIFY_EMAIL
@@ -163,65 +156,28 @@ const orderId = crypto.randomUUID();
       console.warn("[order] could not build cancel URL from request", err);
     }
 
-    // Send email notification via Gmail connector gateway.
+    // Send email notification via external email API (Cloudflare Workers compatible).
+    // Set EMAIL_API_URL in wrangler.toml [vars] to enable email sending.
     let emailSent = false;
     try {
-      const subject = `🔥 Новый заказ LoveVape #${orderData.id.slice(0, 8)}`;
-      const itemsHtml = trustedItems
-        .map((i) => {
-          const flavorText = i.flavor
-            ? `<br/><small style="color:#666">${escapeHtml(i.flavor)}</small>`
-            : "";
-          return `<tr><td style="padding:6px 8px">${escapeHtml(i.name)}${flavorText}</td><td style="padding:6px 8px;text-align:center">${i.qty}</td><td style="padding:6px 8px;text-align:right">${(i.price * i.qty).toFixed(2)} BYN</td></tr>`;
-        })
-        .join("");
-      const html = `
-        <div style="font-family:Arial,sans-serif;color:#111">
-          <h2 style="margin:0 0 12px">Новый заказ #${orderData.id.slice(0, 8)}</h2>
-          <p><b>Username Telegram:</b> ${escapeHtml(data.customer_name)}<br/>
-             <b>Телефон:</b> ${escapeHtml(data.customer_phone)}<br/>
-             <b>Адрес:</b> ${escapeHtml(data.customer_address)}</p>
-          ${data.customer_note ? `<p><b>Комментарий:</b> ${escapeHtml(data.customer_note)}</p>` : ""}
-          <table style="border-collapse:collapse;width:100%;border:1px solid #ddd">
-            <thead><tr style="background:#f4f4f4"><th style="padding:6px 8px;text-align:left">Товар</th><th style="padding:6px 8px">Кол-во</th><th style="padding:6px 8px;text-align:right">Сумма</th></tr></thead>
-            <tbody>${itemsHtml}</tbody>
-            <tfoot><tr><td colspan="2" style="padding:8px;text-align:right"><b>Итого</b></td><td style="padding:8px;text-align:right"><b>${trustedTotal.toFixed(2)} BYN</b></td></tr></tfoot>
-          </table>
-        </div>`;
-
-      const smtpHost = env.SMTP_HOST || getEnv("SMTP_HOST") || "smtp.gmail.com";
-      const smtpPort = parseInt(env.SMTP_PORT || getEnv("SMTP_PORT") || "465");
-      const smtpUser = env.SMTP_USER || getEnv("SMTP_USER") || "375333631370moroz@gmail.com";
-      const smtpPass = env.SMTP_PASS || getEnv("SMTP_PASS") || "mhfaznumbjsdqgba";
-
-      if (smtpHost && smtpUser && smtpPass) {
-        const nodemailer = await import("nodemailer");
-        const transporter = nodemailer.createTransport({
-          host: smtpHost,
-          port: smtpPort,
-          secure: smtpPort === 465,
-          auth: {
-            user: smtpUser,
-            pass: smtpPass,
-          },
+      const emailApiUrl = env.EMAIL_API_URL || getEnv("EMAIL_API_URL");
+      if (emailApiUrl) {
+        const emailRes = await fetch(emailApiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: notifyEmail,
+            subject: `🔥 Новый заказ LoveVape #${orderData.id.slice(0, 8)}`,
+            html: html,
+          }),
+          signal: AbortSignal.timeout(6000),
         });
-
-        // Use Promise.race to prevent hanging in environments like Cloudflare Workers
-        const sendPromise = transporter.sendMail({
-          from: `"LoveVape Shop" <${smtpUser}>`,
-          to: notifyEmail,
-          subject: subject,
-          html: html,
-        });
-
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("SMTP timeout")), 6000),
-        );
-
-        await Promise.race([sendPromise, timeoutPromise]);
-        emailSent = true;
+        emailSent = emailRes.ok;
+        if (!emailRes.ok) {
+          console.warn("[order] email API returned", emailRes.status, await emailRes.text());
+        }
       } else {
-        console.warn("[order] SMTP not configured, skipping email notification");
+        console.warn("[order] EMAIL_API_URL not configured, skipping email notification");
       }
     } catch (err) {
       console.warn("[order] email send skipped:", err);
@@ -488,7 +444,7 @@ export const debugEnv = createServerFn({ method: "GET" }).handler(async ({ conte
     cloudflareKeys: Object.keys((context as any)?.cloudflare || {}),
     cloudflareEnvKeys: Object.keys((context as any)?.cloudflare?.env || {}),
     envKeys: Object.keys((context as any)?.env || {}),
-    processEnvKeys: Object.keys(process.env || {}),
+    processEnvKeys: [],
     globalThisKeys: Object.keys(globalThis).filter(
       (k) =>
         k.includes("TELEGRAM") ||

@@ -558,7 +558,6 @@ export function invalidateProductsCache() {
 }
 
 const PUBLIC_IMAGE_CDN_BASE =
-  process.env.PUBLIC_IMAGE_CDN_BASE ||
   (globalThis as any).env?.PUBLIC_IMAGE_CDN_BASE ||
   (globalThis as any).__env__?.PUBLIC_IMAGE_CDN_BASE ||
   "https://ueazjqvxjlppgtkhcmut.supabase.co/storage/v1/object/public/product-images";
