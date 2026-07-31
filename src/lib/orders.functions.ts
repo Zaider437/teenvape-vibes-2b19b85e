@@ -108,7 +108,15 @@ export const createOrder = createServerFn({ method: "POST" })
       const product = byId.get(i.id);
       if (!product) {
         console.warn(`[order] Product not found in catalog: ${i.id}. Using client-supplied data.`);
-        return { id: i.id, name: i.name, brand: "", price: i.price, qty: i.qty, flavor: i.flavor || null, image: null };
+        return {
+          id: i.id,
+          name: i.name,
+          brand: "",
+          price: i.price,
+          qty: i.qty,
+          flavor: i.flavor || null,
+          image: null,
+        };
       }
       return {
         id: product.id,
@@ -124,7 +132,7 @@ export const createOrder = createServerFn({ method: "POST" })
       trustedItems.reduce((sum, i) => sum + i.price * i.qty, 0).toFixed(2),
     );
 
-const orderId = crypto.randomUUID();
+    const orderId = crypto.randomUUID();
 
     const orderData = {
       id: orderId,
@@ -132,7 +140,14 @@ const orderId = crypto.randomUUID();
       customer_phone: data.customer_phone,
       customer_address: data.customer_address,
       customer_note: data.customer_note,
-      items: trustedItems.map((i) => ({ name: i.name, brand: i.brand, qty: i.qty, price: i.price, flavor: i.flavor, image: i.image })),
+      items: trustedItems.map((i) => ({
+        name: i.name,
+        brand: i.brand,
+        qty: i.qty,
+        price: i.price,
+        flavor: i.flavor,
+        image: i.image,
+      })),
       total_amount: trustedTotal,
       status: "new" as const,
       created_at: new Date().toISOString(),
@@ -400,7 +415,9 @@ export const getOrderByToken = createServerFn({ method: "GET" })
       customer_name: "@telegram_user",
       customer_address: "18:00",
       customer_note: "Сдача не нужна",
-      items: [{ name: "Тестовый товар", brand: "", qty: 1, price: 15.0, flavor: null, image: null }],
+      items: [
+        { name: "Тестовый товар", brand: "", qty: 1, price: 15.0, flavor: null, image: null },
+      ],
       total_amount: 15.0,
       status: "new",
       created_at: new Date().toISOString(),
