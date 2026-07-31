@@ -126,7 +126,6 @@ export type TelegramAuthData = z.infer<typeof authSchema>;
 export const telegramLogin = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => authSchema.parse(input))
   .handler(async ({ data, context }) => {
-<<<<<<< ours
     async function sha256Bytes(input: string): Promise<Uint8Array> {
       const encoder = new TextEncoder();
       const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(input));
@@ -165,8 +164,6 @@ export const telegramLogin = createServerFn({ method: "POST" })
       return bytes;
     }
 
-=======
->>>>>>> theirs
     let env: any = (context as any)?.cloudflare?.env || (context as any)?.env || {};
     try {
       // @ts-expect-error - vinxi/http is resolved at runtime by TanStack Start/Nitro, but its type declarations might not be directly available in the local tsconfig
@@ -190,7 +187,7 @@ export const telegramLogin = createServerFn({ method: "POST" })
     if (!botToken || !seed) {
       const debugInfo = `botToken: ${botToken}, seed: ${seed}, env.TELEGRAM_API_KEY: ${env.TELEGRAM_API_KEY}, getEnv("TELEGRAM_API_KEY"): ${getEnv("TELEGRAM_API_KEY")}`;
       throw new Error(
-        `Сервер не настроен: отсутствуют TELEGRAM_LOGIN_BOT_TOKEN или ADMIN_PASSWORD_SEED. Отладка: ${debugInfo}`,
+        `РЎРµСЂРІРµСЂ РЅРµ РЅР°СЃС‚СЂРѕРµРЅ: РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‚ TELEGRAM_LOGIN_BOT_TOKEN РёР»Рё ADMIN_PASSWORD_SEED. РћС‚Р»Р°РґРєР°: ${debugInfo}`,
       );
     }
 
@@ -201,18 +198,11 @@ export const telegramLogin = createServerFn({ method: "POST" })
       .sort()
       .map((k) => `${k}=${rest[k]}`)
       .join("\n");
-<<<<<<< ours
     const secretBytes = await sha256Bytes(botToken);
     const computed = await hmacSha256Hex(secretBytes, dataCheckString);
     const computedBytes = hexToBytes(computed);
     const hashBytes = hexToBytes(hash);
     if (computedBytes.length !== hashBytes.length || !constantTimeEqual(computedBytes, hashBytes)) {
-=======
-    const secret = await webCryptoSha256(botToken);
-    const computed = await webCryptoHmacSha256(secret, dataCheckString);
-    const b = hexToUint8Array(hash);
-    if (computed.byteLength !== b.length || !timingSafeEqual(new Uint8Array(computed), b)) {
->>>>>>> theirs
       const isDev = true;
       if (isDev) {
         console.warn(
@@ -220,7 +210,7 @@ export const telegramLogin = createServerFn({ method: "POST" })
         );
       } else {
         throw new Error(
-          "Подпись Telegram недействительна. Убедитесь, что в .env и wrangler.toml переменная TELEGRAM_LOGIN_BOT_TOKEN содержит токен именно того бота, через которого вы входите (@lovevape_admin_bot)!",
+          "РџРѕРґРїРёСЃСЊ Telegram РЅРµРґРµР№СЃС‚РІРёС‚РµР»СЊРЅР°. РЈР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ РІ .env Рё wrangler.toml РїРµСЂРµРјРµРЅРЅР°СЏ TELEGRAM_LOGIN_BOT_TOKEN СЃРѕРґРµСЂР¶РёС‚ С‚РѕРєРµРЅ РёРјРµРЅРЅРѕ С‚РѕРіРѕ Р±РѕС‚Р°, С‡РµСЂРµР· РєРѕС‚РѕСЂРѕРіРѕ РІС‹ РІС…РѕРґРёС‚Рµ (@lovevape_admin_bot)!",
         );
       }
     }
@@ -228,13 +218,13 @@ export const telegramLogin = createServerFn({ method: "POST" })
     // 2) Freshness (24h)
     const nowSec = Math.floor(Date.now() / 1000);
     if (nowSec - data.auth_date > 60 * 60 * 24) {
-      throw new Error("Данные Telegram устарели, повторите вход");
+      throw new Error("Р”Р°РЅРЅС‹Рµ Telegram СѓСЃС‚Р°СЂРµР»Рё, РїРѕРІС‚РѕСЂРёС‚Рµ РІС…РѕРґ");
     }
 
     const username = (data.username ?? "").trim();
     if (!username) {
       throw new Error(
-        "У вашего Telegram нет @username — задайте его в настройках Telegram и повторите вход",
+        "РЈ РІР°С€РµРіРѕ Telegram РЅРµС‚ @username вЂ” Р·Р°РґР°Р№С‚Рµ РµРіРѕ РІ РЅР°СЃС‚СЂРѕР№РєР°С… Telegram Рё РїРѕРІС‚РѕСЂРёС‚Рµ РІС…РѕРґ",
       );
     }
 
@@ -253,10 +243,10 @@ export const telegramLogin = createServerFn({ method: "POST" })
     ).rpc("is_admin_telegram_username", { _username: username });
     if (whitelistErr) {
       console.error("[tg-login] whitelist rpc failed", whitelistErr);
-      throw new Error("Не удалось проверить доступ");
+      throw new Error("РќРµ СѓРґР°Р»РѕСЃСЊ РїСЂРѕРІРµСЂРёС‚СЊ РґРѕСЃС‚СѓРї");
     }
     if (!allowed) {
-      throw new Error(`У @${username} нет доступа в админку`);
+      throw new Error(`РЈ @${username} РЅРµС‚ РґРѕСЃС‚СѓРїР° РІ Р°РґРјРёРЅРєСѓ`);
     }
 
     // 4) Provision/refresh Supabase user
@@ -265,16 +255,10 @@ export const telegramLogin = createServerFn({ method: "POST" })
       getEnv("TELEGRAM_USER_EMAIL_DOMAIN") ||
       "telegram.teenvape.internal";
     const email = `tg_${data.id}@${emailDomain}`;
-<<<<<<< ours
     const password = await hmacSha256Hex(new TextEncoder().encode(seed), String(data.id)).slice(
       0,
       48,
     );
-=======
-    const password = bufferToHex(
-      await webCryptoHmacSha256(new TextEncoder().encode(seed).buffer, String(data.id)),
-    ).slice(0, 48);
->>>>>>> theirs
 
     const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -331,7 +315,7 @@ export const telegramLogin = createServerFn({ method: "POST" })
           createErr,
           emailForSearch,
         });
-        throw new Error("Не удалось создать сессию");
+        throw new Error("РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ СЃРµСЃСЃРёСЋ");
       }
       userId = found.id;
       await supabaseAdmin.auth.admin.updateUserById(userId, {
