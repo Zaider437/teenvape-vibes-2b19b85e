@@ -26,10 +26,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../components/ui/s
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "LoveVape вЂ” РІРµР№РїС‹, Р¶РёР¶Рё Рё СЂР°СЃС…РѕРґРЅРёРєРё РІ Р“СЂРѕРґРЅРѕ" },
+      { title: "LoveVape — вейпы, жижи и расходники в Гродно" },
       {
         name: "description",
-        content: "РћРґРЅРѕСЂР°Р·РєРё, POD-СЃРёСЃС‚РµРјС‹ Рё Р¶РёРґРєРѕСЃС‚Рё. Р’СЃС‚СЂРµС‡Р° РїРѕ Р“СЂРѕРґРЅРѕ, РѕРїР»Р°С‚Р° РЅР° РјРµСЃС‚Рµ.",
+        content: "Одноразки, POD-системы и жидкости. Встреча по Гродно, оплата на месте.",
       },
     ],
   }),
@@ -64,7 +64,7 @@ export function Shop({ snowActive }: { snowActive?: boolean }) {
       })
       .catch((err) => {
         console.error("[shop] load products failed", err);
-        if (!cancelled) toast.error("РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ РєР°С‚Р°Р»РѕРі");
+        if (!cancelled) toast.error("Не удалось загрузить каталог");
       })
       .finally(() => {
         if (!cancelled) setLoadingProducts(false);
@@ -103,11 +103,11 @@ export function Shop({ snowActive }: { snowActive?: boolean }) {
   const dynamicCategories = useMemo(() => {
     const uniqueCategories = Array.from(new Set(products.map((p) => p.category)));
     const CATEGORY_MAP: Record<string, { label: string; emoji: string }> = {
-      disposable: { label: "РћРґРЅРѕСЂР°Р·РєРё", emoji: "рџ’Ё" },
-      device: { label: "РЈСЃС‚СЂРѕР№СЃС‚РІР°", emoji: "вљЎ" },
-      liquid: { label: "Р–РёРґРєРѕСЃС‚Рё", emoji: "рџ§Є" },
-      consumable: { label: "Р Р°СЃС…РѕРґРЅРёРєРё", emoji: "рџ§©" },
-      snus: { label: "РЎРЅСЋСЃ", emoji: "рџЌѓ" },
+      disposable: { label: "Одноразки", emoji: "💨" },
+      device: { label: "Устройства", emoji: "⚡" },
+      liquid: { label: "Жидкости", emoji: "🧪" },
+      consumable: { label: "Расходники", emoji: "🧩" },
+      snus: { label: "Снюс", emoji: "🍃" },
     };
     const list = uniqueCategories.map((id) => {
       const mapped = CATEGORY_MAP[id];
@@ -115,9 +115,9 @@ export function Shop({ snowActive }: { snowActive?: boolean }) {
         return { id, label: mapped.label, emoji: mapped.emoji };
       }
       const label = id.charAt(0).toUpperCase() + id.slice(1);
-      return { id, label, emoji: "рџ“¦" };
+      return { id, label, emoji: "📦" };
     });
-    return [{ id: "all", label: "Р’СЃС‘", emoji: "рџ”Ґ" }, ...list];
+    return [{ id: "all", label: "Всё", emoji: "🔥" }, ...list];
   }, [products]);
 
   function selectCategory(id: string) {
@@ -160,16 +160,16 @@ export function Shop({ snowActive }: { snowActive?: boolean }) {
             inputMode="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="РџРѕРёСЃРє С‚РѕРІР°СЂР°вЂ¦"
+            placeholder="Поиск товара…"
             className="w-full h-10 sm:h-11 pl-9 sm:pl-10 pr-9 sm:pr-10 rounded-xl bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all"
-            aria-label="РџРѕРёСЃРє С‚РѕРІР°СЂР°"
+            aria-label="Поиск товара"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery("")}
               className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-muted grid place-items-center text-muted-foreground hover:text-foreground"
-              aria-label="РћС‡РёСЃС‚РёС‚СЊ"
+              aria-label="Очистить"
             >
               <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <X className="w-4 h-4" />
@@ -203,7 +203,7 @@ export function Shop({ snowActive }: { snowActive?: boolean }) {
         <div className="px-3 sm:px-4 mt-2 space-y-2">
           {brandOptions.length > 0 && (
             <SubFilterRow
-              label="РџСЂРѕРёР·РІРѕРґРёС‚РµР»СЊ"
+              label="Производитель"
               options={brandOptions}
               value={brand}
               onChange={setBrand}
@@ -211,7 +211,7 @@ export function Shop({ snowActive }: { snowActive?: boolean }) {
           )}
           {flavorOptions.length > 0 && (
             <SubFilterRow
-              label={category === "liquid" || category === "disposable" ? "Р’РєСѓСЃ" : "РўРёРї"}
+              label={category === "liquid" || category === "disposable" ? "Вкус" : "Тип"}
               options={flavorOptions}
               value={flavor}
               onChange={setFlavor}
@@ -223,11 +223,11 @@ export function Shop({ snowActive }: { snowActive?: boolean }) {
       {/* products grid */}
       {loadingProducts ? (
         <div className="px-3 sm:px-4 mt-6 sm:mt-8 text-center text-sm text-muted-foreground">
-          Р—Р°РіСЂСѓР¶Р°РµРј РєР°С‚Р°Р»РѕРівЂ¦
+          Загружаем каталог…
         </div>
       ) : filtered.length === 0 ? (
         <div className="px-3 sm:px-4 mt-6 sm:mt-8 text-center">
-          <p className="text-sm text-muted-foreground">РќРёС‡РµРіРѕ РЅРµ РЅР°Р№РґРµРЅРѕ РїРѕ Р·Р°РїСЂРѕСЃСѓ В«{query}В»</p>
+          <p className="text-sm text-muted-foreground">Ничего не найдено по запросу «{query}»</p>
           <button
             onClick={() => {
               setQuery("");
@@ -235,7 +235,7 @@ export function Shop({ snowActive }: { snowActive?: boolean }) {
             }}
             className="mt-4 inline-flex items-center gap-2 bg-primary text-primary-foreground font-black uppercase tracking-widest text-xs px-5 py-2.5 rounded-full glow-soft"
           >
-            РЎР±СЂРѕСЃРёС‚СЊ РїРѕРёСЃРє
+            Сбросить поиск
           </button>
         </div>
       ) : (
@@ -304,7 +304,7 @@ function SubFilterRow({
               : "bg-card text-muted-foreground border-border hover:border-secondary/60"
           }`}
         >
-          Р’СЃРµ
+          Все
         </button>
         {options.map((opt) => (
           <button
@@ -337,7 +337,7 @@ function Header({ onOpenCart, snowActive }: { onOpenCart: () => void; snowActive
                 className="absolute -top-1 -right-1 text-base animate-bounce"
                 aria-hidden="true"
               >
-                рџЋ„
+                🎄
               </span>
             )}
           </div>
@@ -354,25 +354,25 @@ function Header({ onOpenCart, snowActive }: { onOpenCart: () => void; snowActive
             target="_blank"
             rel="noopener noreferrer"
             className="h-8 sm:h-9 rounded-lg sm:rounded-xl bg-primary text-primary-foreground px-1.5 sm:px-2.5 grid place-items-center gap-1 glow-soft active:translate-y-0.5 text-[10px] sm:text-xs font-bold"
-            aria-label="Р§Р°С‚ Telegram"
+            aria-label="Чат Telegram"
           >
             <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2.5} />
-            <span>РќР°С€ С‡Р°С‚</span>
+            <span>Наш чат</span>
           </a>
           <a
             href="https://t.me/Love_Vape1"
             target="_blank"
             rel="noopener noreferrer"
             className="h-8 sm:h-9 rounded-lg sm:rounded-xl bg-secondary text-secondary-foreground px-1.5 sm:px-2.5 grid place-items-center gap-1 active:translate-y-0.5 text-[10px] sm:text-xs font-bold"
-            aria-label="РЎРІСЏР·СЊ СЃ РЅР°РјРё РІ Telegram"
+            aria-label="Связь с нами в Telegram"
           >
             <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2.5} />
-            <span>РЎРІСЏР·СЊ СЃ РЅР°РјРё</span>
+            <span>Связь с нами</span>
           </a>
           <button
             onClick={onOpenCart}
             className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary text-primary-foreground grid place-items-center glow-soft active:translate-y-0.5"
-            aria-label="РљРѕСЂР·РёРЅР°"
+            aria-label="Корзина"
           >
             <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2.5} />
             {count > 0 && (
@@ -405,22 +405,22 @@ function Hero({ total }: { total: number }) {
             <span className="text-primary text-glow-pink">VAPE.</span>
           </h1>
           <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-muted-foreground max-w-[90%] leading-relaxed">
-            РћРґРЅРѕСЂР°Р·РєРё, POD-СЃРёСЃС‚РµРјС‹ Рё Р¶РёРґРєРѕСЃС‚Рё. Р’СЃС‚СЂРµС‡Р° РїРѕ Р“СЂРѕРґРЅРѕ, РѕРїР»Р°С‚Р° РЅР° РјРµСЃС‚Рµ.
+            Одноразки, POD-системы и жидкости. Встреча по Гродно, оплата на месте.
           </p>
           <a
             href="#catalog"
             className="inline-flex items-center gap-2 mt-4 sm:mt-5 bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] sm:text-xs px-4 sm:px-6 py-2 sm:py-3 rounded-full glow-soft active:translate-y-0.5"
           >
-            <Heart className="w-3 h-3 sm:w-4 sm:h-4 fill-current" /> Рє РєР°С‚Р°Р»РѕРіСѓ
+            <Heart className="w-3 h-3 sm:w-4 sm:h-4 fill-current" /> к каталогу
           </a>
         </div>
       </div>
       <div id="catalog" className="mt-4 sm:mt-6 flex items-baseline justify-between">
         <h2 className="font-display text-2xl sm:text-3xl text-foreground">
-          РљР°С‚Р°Р»РѕРі<span className="text-primary">.</span>
+          Каталог<span className="text-primary">.</span>
         </h2>
         <span className="text-[10px] sm:text-xs uppercase tracking-widest text-muted-foreground">
-          {total} С‚РѕРІР°СЂРѕРІ
+          {total} товаров
         </span>
       </div>
     </section>
@@ -438,7 +438,7 @@ function ProductCard({ product, onOpen }: { product: Product; onOpen: (p: Produc
     >
       {out && (
         <div className="absolute top-1.5 left-1.5 z-10 text-[9px] font-black uppercase tracking-widest bg-background/90 text-muted-foreground px-1.5 py-0.5 rounded-full border border-border">
-          РЅРµС‚ РІ РЅР°Р»РёС‡РёРё
+          нет в наличии
         </div>
       )}
       <div className="aspect-[4/5] sm:aspect-[3/4] grid place-items-center text-4xl sm:text-5xl bg-primary/5 border-b border-border/60 relative overflow-hidden">
@@ -451,7 +451,7 @@ function ProductCard({ product, onOpen }: { product: Product; onOpen: (p: Produc
         <button
           onClick={() => onOpen(product)}
           className="relative w-full h-full flex items-center justify-center cursor-pointer"
-          aria-label={`РџРѕРґСЂРѕР±РЅРµРµ Рѕ ${product.name}`}
+          aria-label={`Подробнее о ${product.name}`}
         >
           {product.image && !broken ? (
             <img
@@ -495,12 +495,12 @@ function ProductCard({ product, onOpen }: { product: Product; onOpen: (p: Produc
               if (out) return;
               add(product);
               toast.success(
-                `${product.name}${product.flavor ? ` (${product.flavor})` : ""} РІ РєРѕСЂР·РёРЅРµ`,
+                `${product.name}${product.flavor ? ` (${product.flavor})` : ""} в корзине`,
               );
             }}
             disabled={out}
             className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg grid place-items-center bg-primary text-primary-foreground glow-soft active:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Р”РѕР±Р°РІРёС‚СЊ"
+            aria-label="Добавить"
           >
             <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={3} />
           </button>
@@ -521,9 +521,9 @@ function FloatingCartBar({ onOpen }: { onOpen: () => void }) {
       >
         <span className="flex items-center gap-2">
           <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={3} />
-          {count} С€С‚.
+          {count} шт.
         </span>
-        <span>{total.toFixed(2)} BYN в†’</span>
+        <span>{total.toFixed(2)} BYN →</span>
       </button>
     </div>
   );
@@ -551,7 +551,7 @@ function ProductDetail({ product }: { product: Product }) {
       <div className="space-y-1 sm:space-y-1.5">
         <div className="text-xs sm:text-sm text-muted-foreground">
           <span className="font-bold text-foreground">{product.brand}</span>
-          {product.flavor && <span> В· {product.flavor}</span>}
+          {product.flavor && <span> · {product.flavor}</span>}
         </div>
         {product.puffs && <div className="text-xs sm:text-sm text-primary">{product.puffs}</div>}
         {product.volume && <div className="text-xs sm:text-sm text-primary">{product.volume}</div>}
@@ -567,12 +567,12 @@ function ProductDetail({ product }: { product: Product }) {
           onClick={() => {
             if (out) return;
             add(product);
-            toast.success(`${product.name} РІ РєРѕСЂР·РёРЅРµ`);
+            toast.success(`${product.name} в корзине`);
           }}
           disabled={out}
           className="mt-2 sm:mt-3 w-full bg-primary text-primary-foreground font-black uppercase tracking-widest py-2 sm:py-2.5 rounded-xl glow-soft disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
         >
-          {out ? "РќРµС‚ РІ РЅР°Р»РёС‡РёРё" : "Р’ РєРѕСЂР·РёРЅСѓ"}
+          {out ? "Нет в наличии" : "В корзину"}
         </button>
       </div>
     </div>
@@ -603,13 +603,13 @@ function CartDrawer({
       >
         <SheetHeader className="p-3 sm:p-4 border-b border-border">
           <SheetTitle className="font-display text-xl sm:text-2xl truncate">
-            РўРІРѕСЏ РєРѕСЂР·РёРЅР°
+            Твоя корзина
           </SheetTitle>
         </SheetHeader>
         <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 sm:space-y-3">
           {items.length === 0 && (
             <p className="text-center text-muted-foreground py-8 sm:py-10 text-sm">
-              РџСѓСЃС‚Рѕ. Р—Р°РєРёРЅСЊ С‡С‚Рѕ-РЅРёР±СѓРґСЊ рџ’Ё
+              Пусто. Закинь что-нибудь 💨
             </p>
           )}
           {items.map((i) => (
@@ -650,7 +650,7 @@ function CartDrawer({
                 <button
                   onClick={() => setQty(i.product.id, i.qty - 1)}
                   className="w-6 h-6 sm:w-7 sm:h-7 rounded grid place-items-center bg-muted"
-                  aria-label="РЈРјРµРЅСЊС€РёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ"
+                  aria-label="Уменьшить количество"
                 >
                   <Minus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                 </button>
@@ -658,14 +658,14 @@ function CartDrawer({
                 <button
                   onClick={() => setQty(i.product.id, i.qty + 1)}
                   className="w-6 h-6 sm:w-7 sm:h-7 rounded bg-primary text-primary-foreground grid place-items-center"
-                  aria-label="РЈРІРµР»РёС‡РёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ"
+                  aria-label="Увеличить количество"
                 >
                   <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3" strokeWidth={3} />
                 </button>
                 <button
                   onClick={() => remove(i.product.id)}
                   className="ml-0.5 sm:ml-1 w-6 h-6 sm:w-7 sm:h-7 rounded bg-destructive/20 text-destructive grid place-items-center"
-                  aria-label="РЈРґР°Р»РёС‚СЊ РёР· РєРѕСЂР·РёРЅС‹"
+                  aria-label="Удалить из корзины"
                 >
                   <Trash2 className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                 </button>
@@ -676,20 +676,20 @@ function CartDrawer({
         {items.length > 0 && (
           <div className="p-3 sm:p-4 border-t border-border space-y-2 sm:space-y-3">
             <div className="flex justify-between font-display text-xl sm:text-2xl">
-              <span>РС‚РѕРіРѕ</span>
+              <span>Итого</span>
               <span className="text-primary text-glow-pink">{total.toFixed(2)} BYN</span>
             </div>
             <button
               onClick={onCheckout}
               className="w-full bg-primary text-primary-foreground font-black uppercase tracking-widest py-2.5 sm:py-3 rounded-xl glow-pink text-sm sm:text-base"
             >
-              РћС„РѕСЂРјРёС‚СЊ Р·Р°РєР°Р·
+              Оформить заказ
             </button>
             <button
               onClick={clear}
               className="w-full text-[10px] sm:text-xs text-muted-foreground underline"
             >
-              РћС‡РёСЃС‚РёС‚СЊ РєРѕСЂР·РёРЅСѓ
+              Очистить корзину
             </button>
           </div>
         )}
@@ -705,8 +705,8 @@ const MEETING_TIMES = [
   "18:00",
   "20:20",
   "21:00",
-  "РџРѕСЃР»Рµ 21:00 вЂ” РѕС‚РґР°Рј С‚Р°Рј, РіРґРµ Р±СѓРґСѓ РЅР°С…РѕРґРёС‚СЊСЃСЏ. Р—Р°РєР°Р¶РёС‚Рµ Р·Р°СЂР°РЅРµРµ!",
-  "Р”Р»СЏ Р·Р°РєР°Р·Р° РЇРЅРґРµРєСЃ Р”РѕСЃС‚Р°РІРєРё",
+  "После 21:00 — отдам там, где буду находиться. Закажите заранее!",
+  "Для заказа Яндекс Доставки",
 ] as const;
 
 function CheckoutSheet({ onClose }: { onClose: () => void }) {
@@ -721,24 +721,24 @@ function CheckoutSheet({ onClose }: { onClose: () => void }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!telegram.trim()) {
-      toast.error("РЈРєР°Р¶Рё СЋР·РµСЂРЅРµР№Рј Telegram");
+      toast.error("Укажи юзернейм Telegram");
       return;
     }
     if (items.length === 0) return;
     const tg = telegram.trim().replace(/^@+/, "");
     if (tg.length < 3) {
-      toast.error("Р®Р·РµСЂРЅРµР№Рј СЃР»РёС€РєРѕРј РєРѕСЂРѕС‚РєРёР№");
+      toast.error("Юзернейм слишком короткий");
       return;
     }
     setLoading(true);
     try {
-      const noteParts = [`РЎРґР°С‡Р°: ${change.trim() ? change.trim() : "РЅРµ РЅСѓР¶РЅР°"}`];
+      const noteParts = [`Сдача: ${change.trim() ? change.trim() : "не нужна"}`];
       const res = await submit({
         data: {
           customer_name: `@${tg}`,
           customer_phone: "Telegram",
           customer_address: meetingTime,
-          customer_note: noteParts.join(" В· "),
+          customer_note: noteParts.join(" · "),
           items: items.map((i) => ({
             id: i.product.id,
             name: i.product.name,
@@ -754,7 +754,7 @@ function CheckoutSheet({ onClose }: { onClose: () => void }) {
       clear();
     } catch (err) {
       console.error(err);
-      toast.error("РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РїСЂР°РІРёС‚СЊ Р·Р°РєР°Р·. РџРѕРїСЂРѕР±СѓР№ РµС‰С‘ СЂР°Р·.");
+      toast.error("Не удалось отправить заказ. Попробуй ещё раз.");
     } finally {
       setLoading(false);
     }
@@ -764,11 +764,11 @@ function CheckoutSheet({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex flex-col">
       <div className="mt-auto bg-card rounded-t-3xl border-t-2 border-secondary max-h-[92vh] flex flex-col">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 p-4 border-b border-border">
-          <h3 className="font-display text-2xl truncate">{done ? "Р—Р°РєР°Р· РїСЂРёРЅСЏС‚" : "РћС„РѕСЂРјР»РµРЅРёРµ"}</h3>
+          <h3 className="font-display text-2xl truncate">{done ? "Заказ принят" : "Оформление"}</h3>
           <button
             onClick={onClose}
             className="w-9 h-9 rounded-lg bg-muted grid place-items-center shrink-0"
-            aria-label="Р—Р°РєСЂС‹С‚СЊ"
+            aria-label="Закрыть"
           >
             <X className="w-5 h-5" />
           </button>
@@ -777,37 +777,37 @@ function CheckoutSheet({ onClose }: { onClose: () => void }) {
         {done ? (
           <div className="p-6 text-center flex-1 overflow-y-auto">
             <CheckCircle2 className="w-16 h-16 text-primary mx-auto" strokeWidth={2.5} />
-            <h4 className="font-display text-3xl mt-3 text-glow-pink text-primary">Р“РѕС‚РѕРІРѕ!</h4>
+            <h4 className="font-display text-3xl mt-3 text-glow-pink text-primary">Готово!</h4>
             <p className="mt-2 text-sm text-muted-foreground">
-              РќРѕРјРµСЂ Р·Р°РєР°Р·Р° <span className="font-mono text-foreground">#{done.id.slice(0, 8)}</span>
-              . РњС‹ РЅР°РїРёС€РµРј С‚РµР±Рµ РІ Telegram РІ Р±Р»РёР¶Р°Р№С€РµРµ РІСЂРµРјСЏ.
+              Номер заказа <span className="font-mono text-foreground">#{done.id.slice(0, 8)}</span>
+              . Мы напишем тебе в Telegram в ближайшее время.
             </p>
             <button
               onClick={onClose}
               className="mt-6 bg-primary text-primary-foreground font-black uppercase tracking-widest px-6 py-3 rounded-xl glow-soft"
             >
-              Р—Р°РєСЂС‹С‚СЊ
+              Закрыть
             </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-4 space-y-3 overflow-y-auto">
             <Field
-              label="Р®Р·РµСЂРЅРµР№Рј Telegram"
+              label="Юзернейм Telegram"
               value={telegram}
               onChange={setTelegram}
               placeholder="@username"
             />
             <Field
-              label="РќСѓР¶РЅР° Р»Рё СЃРґР°С‡Р°?"
+              label="Нужна ли сдача?"
               value={change}
               onChange={setChange}
-              placeholder="РќР°РїСЂРёРјРµСЂ: СЃРґР°С‡Р° СЃ 50"
+              placeholder="Например: сдача с 50"
               textarea
             />
 
             <label className="block">
               <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                Р’СЂРµРјСЏ РІСЃС‚СЂРµС‡Рё
+                Время встречи
               </span>
               <div className="mt-2 grid grid-cols-2 gap-2">
                 {MEETING_TIMES.map((t) => {
@@ -832,19 +832,19 @@ function CheckoutSheet({ onClose }: { onClose: () => void }) {
 
             <div className="bg-background rounded-xl p-3 border border-border">
               <div className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
-                Р—Р°РєР°Р·
+                Заказ
               </div>
               {items.map((i) => (
                 <div key={i.product.id} className="flex justify-between text-sm py-0.5">
                   <span className="truncate mr-2">
-                    {i.product.brand} вЂ” {i.product.name}
-                    {i.product.flavor ? `, ${i.product.flavor}` : ""} Г— {i.qty}
+                    {i.product.brand} — {i.product.name}
+                    {i.product.flavor ? `, ${i.product.flavor}` : ""} × {i.qty}
                   </span>
                   <span className="font-bold shrink-0">{(i.product.price * i.qty).toFixed(2)}</span>
                 </div>
               ))}
               <div className="mt-2 pt-2 border-t border-border flex justify-between font-display text-xl">
-                <span>РС‚РѕРіРѕ</span>
+                <span>Итого</span>
                 <span className="text-primary">{total.toFixed(2)} BYN</span>
               </div>
             </div>
@@ -854,10 +854,10 @@ function CheckoutSheet({ onClose }: { onClose: () => void }) {
               disabled={loading}
               className="w-full bg-primary text-primary-foreground font-black uppercase tracking-widest py-3 rounded-xl glow-pink disabled:opacity-60"
             >
-              {loading ? "РћС‚РїСЂР°РІР»СЏРµРј..." : "РџРѕРґС‚РІРµСЂРґРёС‚СЊ Р·Р°РєР°Р·"}
+              {loading ? "Отправляем..." : "Подтвердить заказ"}
             </button>
             <p className="text-[10px] text-center text-muted-foreground">
-              РќР°Р¶РёРјР°СЏ РєРЅРѕРїРєСѓ, РІС‹ РїРѕРґС‚РІРµСЂР¶РґР°РµС‚Рµ РІРѕР·СЂР°СЃС‚ 18+ Рё СЃРѕРіР»Р°СЃРёРµ РЅР° РѕР±СЂР°Р±РѕС‚РєСѓ РґР°РЅРЅС‹С….
+              Нажимая кнопку, вы подтверждаете возраст 18+ и согласие на обработку данных.
             </p>
           </form>
         )}
@@ -917,7 +917,7 @@ function Footer() {
           <span className="text-primary">Love</span>
           <span className="text-foreground">Vape</span>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">Р’СЃС‚СЂРµС‡Р° РїРѕ РіРѕСЂРѕРґСѓ В· РћРїР»Р°С‚Р° РЅР° РјРµСЃС‚Рµ</p>
+        <p className="text-xs text-muted-foreground mt-1">Встреча по городу · Оплата на месте</p>
       </div>
     </footer>
   );

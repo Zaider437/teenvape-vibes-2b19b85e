@@ -187,7 +187,7 @@ export const telegramLogin = createServerFn({ method: "POST" })
     if (!botToken || !seed) {
       const debugInfo = `botToken: ${botToken}, seed: ${seed}, env.TELEGRAM_API_KEY: ${env.TELEGRAM_API_KEY}, getEnv("TELEGRAM_API_KEY"): ${getEnv("TELEGRAM_API_KEY")}`;
       throw new Error(
-        `РЎРµСЂРІРµСЂ РЅРµ РЅР°СЃС‚СЂРѕРµРЅ: РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‚ TELEGRAM_LOGIN_BOT_TOKEN РёР»Рё ADMIN_PASSWORD_SEED. РћС‚Р»Р°РґРєР°: ${debugInfo}`,
+        `Сервер не настроен: отсутствуют TELEGRAM_LOGIN_BOT_TOKEN или ADMIN_PASSWORD_SEED. Отладка: ${debugInfo}`,
       );
     }
 
@@ -210,7 +210,7 @@ export const telegramLogin = createServerFn({ method: "POST" })
         );
       } else {
         throw new Error(
-          "РџРѕРґРїРёСЃСЊ Telegram РЅРµРґРµР№СЃС‚РІРёС‚РµР»СЊРЅР°. РЈР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ РІ .env Рё wrangler.toml РїРµСЂРµРјРµРЅРЅР°СЏ TELEGRAM_LOGIN_BOT_TOKEN СЃРѕРґРµСЂР¶РёС‚ С‚РѕРєРµРЅ РёРјРµРЅРЅРѕ С‚РѕРіРѕ Р±РѕС‚Р°, С‡РµСЂРµР· РєРѕС‚РѕСЂРѕРіРѕ РІС‹ РІС…РѕРґРёС‚Рµ (@lovevape_admin_bot)!",
+          "Подпись Telegram недействительна. Убедитесь, что в .env и wrangler.toml переменная TELEGRAM_LOGIN_BOT_TOKEN содержит токен именно того бота, через которого вы входите (@lovevape_admin_bot)!",
         );
       }
     }
@@ -218,13 +218,13 @@ export const telegramLogin = createServerFn({ method: "POST" })
     // 2) Freshness (24h)
     const nowSec = Math.floor(Date.now() / 1000);
     if (nowSec - data.auth_date > 60 * 60 * 24) {
-      throw new Error("Р”Р°РЅРЅС‹Рµ Telegram СѓСЃС‚Р°СЂРµР»Рё, РїРѕРІС‚РѕСЂРёС‚Рµ РІС…РѕРґ");
+      throw new Error("Данные Telegram устарели, повторите вход");
     }
 
     const username = (data.username ?? "").trim();
     if (!username) {
       throw new Error(
-        "РЈ РІР°С€РµРіРѕ Telegram РЅРµС‚ @username вЂ” Р·Р°РґР°Р№С‚Рµ РµРіРѕ РІ РЅР°СЃС‚СЂРѕР№РєР°С… Telegram Рё РїРѕРІС‚РѕСЂРёС‚Рµ РІС…РѕРґ",
+        "У вашего Telegram нет @username — задайте его в настройках Telegram и повторите вход",
       );
     }
 
@@ -243,10 +243,10 @@ export const telegramLogin = createServerFn({ method: "POST" })
     ).rpc("is_admin_telegram_username", { _username: username });
     if (whitelistErr) {
       console.error("[tg-login] whitelist rpc failed", whitelistErr);
-      throw new Error("РќРµ СѓРґР°Р»РѕСЃСЊ РїСЂРѕРІРµСЂРёС‚СЊ РґРѕСЃС‚СѓРї");
+      throw new Error("Не удалось проверить доступ");
     }
     if (!allowed) {
-      throw new Error(`РЈ @${username} РЅРµС‚ РґРѕСЃС‚СѓРїР° РІ Р°РґРјРёРЅРєСѓ`);
+      throw new Error(`У @${username} нет доступа в админку`);
     }
 
     // 4) Provision/refresh Supabase user
@@ -315,7 +315,7 @@ export const telegramLogin = createServerFn({ method: "POST" })
           createErr,
           emailForSearch,
         });
-        throw new Error("РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ СЃРµСЃСЃРёСЋ");
+        throw new Error("Не удалось создать сессию");
       }
       userId = found.id;
       await supabaseAdmin.auth.admin.updateUserById(userId, {
