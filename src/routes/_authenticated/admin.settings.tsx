@@ -29,10 +29,12 @@ function AdminSettings() {
   const [leavesEnabled, setLeavesEnabled] = useState(true);
   const [leavesFrom, setLeavesFrom] = useState(9);
   const [leavesTo, setLeavesTo] = useState(11);
+  const [leavesCount, setLeavesCount] = useState(30);
 
   const [snowEnabled, setSnowEnabled] = useState(true);
   const [snowFrom, setSnowFrom] = useState(12);
   const [snowTo, setSnowTo] = useState(2);
+  const [snowCount, setSnowCount] = useState(40);
 
   async function load() {
     setLoading(true);
@@ -44,9 +46,11 @@ function AdminSettings() {
         setLeavesEnabled(animData.leaves.enabled);
         setLeavesFrom(animData.leaves.from);
         setLeavesTo(animData.leaves.to);
+        setLeavesCount(animData.leaves.count ?? 30);
         setSnowEnabled(animData.snow.enabled);
         setSnowFrom(animData.snow.from);
         setSnowTo(animData.snow.to);
+        setSnowCount(animData.snow.count ?? 40);
       }
     } catch (e: any) {
       toast.error(e?.message ?? "Ошибка загрузки");
@@ -66,8 +70,8 @@ function AdminSettings() {
         updateTimes({ data: { times } }),
         updateAnim({
           data: {
-            leaves: { enabled: leavesEnabled, from: Number(leavesFrom), to: Number(leavesTo) },
-            snow: { enabled: snowEnabled, from: Number(snowFrom), to: Number(snowTo) },
+            leaves: { enabled: leavesEnabled, from: Number(leavesFrom), to: Number(leavesTo), count: Number(leavesCount) },
+            snow: { enabled: snowEnabled, from: Number(snowFrom), to: Number(snowTo), count: Number(snowCount) },
           },
         }),
       ]);
@@ -175,6 +179,21 @@ function AdminSettings() {
                   </div>
                 </div>
               )}
+              {leavesEnabled && (
+                <div className="pl-6 pt-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Количество листьев: {leavesCount}
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={leavesCount}
+                    onChange={(e) => setLeavesCount(Number(e.target.value))}
+                    className="w-full mt-1 accent-primary"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Snow Animation */}
@@ -220,6 +239,21 @@ function AdminSettings() {
                       className="w-full bg-background border-2 border-border rounded-xl px-3 py-2 mt-1 text-sm text-foreground focus:border-primary focus:outline-none"
                     />
                   </div>
+                </div>
+              )}
+              {snowEnabled && (
+                <div className="pl-6 pt-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Количество снега: {snowCount}
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={snowCount}
+                    onChange={(e) => setSnowCount(Number(e.target.value))}
+                    className="w-full mt-1 accent-primary"
+                  />
                 </div>
               )}
             </div>

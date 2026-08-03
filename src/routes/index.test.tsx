@@ -178,18 +178,6 @@ describe("Shop Component", () => {
     }
   });
 
-  it("renders the Telegram chat button with correct link", async () => {
-    render(
-      <CartProvider>
-        <Shop />
-      </CartProvider>,
-    );
-
-    const chatLink = screen.getByRole("link", { name: /Чат Telegram/i });
-    expect(chatLink).toBeDefined();
-    expect(chatLink).toHaveAttribute("href", "https://t.me/+uEve7WOFVxpmM2Ey");
-  });
-
   it("renders the Telegram contact button with correct link", async () => {
     render(
       <CartProvider>

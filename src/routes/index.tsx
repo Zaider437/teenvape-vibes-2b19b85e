@@ -11,7 +11,6 @@ import {
   CheckCircle2,
   Heart,
   Search,
-  MessageCircle,
   Send,
 } from "lucide-react";
 import { CartProvider, useCart } from "../lib/cart";
@@ -185,7 +184,7 @@ export function Shop({ snowActive }: { snowActive?: boolean }) {
             <button
               key={c.id}
               onClick={() => selectCategory(c.id)}
-              className={`snap-start shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all ${
+              className={`snap-start shrink-0 px-4 sm:px-4 py-2 sm:py-2 rounded-full border-2 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all ${
                 category === c.id
                   ? "bg-primary text-primary-foreground border-primary glow-pink"
                   : "bg-card text-foreground border-border hover:border-primary/60"
@@ -298,7 +297,7 @@ function SubFilterRow({
       <div className="flex gap-1 sm:gap-1.5 overflow-x-auto pb-1 -mx-3 sm:-mx-4 px-3 sm:px-4 snap-x">
         <button
           onClick={() => onChange("all")}
-          className={`snap-start shrink-0 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
+          className={`snap-start shrink-0 px-3 sm:px-3 py-1.5 sm:py-1.5 rounded-full text-xs sm:text-xs font-semibold border transition-all ${
             value === "all"
               ? "bg-secondary text-secondary-foreground border-secondary"
               : "bg-card text-muted-foreground border-border hover:border-secondary/60"
@@ -310,7 +309,7 @@ function SubFilterRow({
           <button
             key={opt}
             onClick={() => onChange(opt)}
-            className={`snap-start shrink-0 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold border transition-all ${
+            className={`snap-start shrink-0 px-3 sm:px-3 py-1.5 sm:py-1.5 rounded-full text-xs sm:text-xs font-semibold border transition-all ${
               value === opt
                 ? "bg-secondary text-secondary-foreground border-secondary"
                 : "bg-card text-muted-foreground border-border hover:border-secondary/60"
@@ -350,20 +349,10 @@ function Header({ onOpenCart, snowActive }: { onOpenCart: () => void; snowActive
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <a
-            href="https://t.me/+uEve7WOFVxpmM2Ey"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="h-8 sm:h-9 rounded-lg sm:rounded-xl bg-primary text-primary-foreground px-1.5 sm:px-2.5 grid place-items-center gap-1 glow-soft active:translate-y-0.5 text-[10px] sm:text-xs font-bold"
-            aria-label="Чат Telegram"
-          >
-            <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2.5} />
-            <span>Наш чат</span>
-          </a>
-          <a
             href="https://t.me/Love_Vape1"
             target="_blank"
             rel="noopener noreferrer"
-            className="h-8 sm:h-9 rounded-lg sm:rounded-xl bg-secondary text-secondary-foreground px-1.5 sm:px-2.5 grid place-items-center gap-1 active:translate-y-0.5 text-[10px] sm:text-xs font-bold"
+            className="h-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary text-primary-foreground px-3 sm:px-3 flex items-center gap-1.5 glow-soft active:translate-y-0.5 text-xs sm:text-xs font-bold"
             aria-label="Связь с нами в Telegram"
           >
             <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2.5} />
@@ -371,7 +360,7 @@ function Header({ onOpenCart, snowActive }: { onOpenCart: () => void; snowActive
           </a>
           <button
             onClick={onOpenCart}
-            className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary text-primary-foreground grid place-items-center glow-soft active:translate-y-0.5"
+            className="relative w-10 h-10 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary text-primary-foreground grid place-items-center glow-soft active:translate-y-0.5"
             aria-label="Корзина"
           >
             <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2.5} />
@@ -429,18 +418,12 @@ function Hero({ total }: { total: number }) {
 
 function ProductCard({ product, onOpen }: { product: Product; onOpen: (p: Product) => void }) {
   const { add } = useCart();
-  const out = !product.in_stock;
   const [broken, setBroken] = useState(false);
   return (
     <div
-      className={`relative rounded-xl border border-border overflow-hidden flex flex-col transition-all ${out ? "opacity-50 grayscale" : "hover:border-primary/60 hover:-translate-y-0.5"}`}
+      className="relative rounded-xl border border-border overflow-hidden flex flex-col transition-all hover:border-primary/60 hover:-translate-y-0.5"
       style={{ backgroundImage: "var(--gradient-card)" }}
     >
-      {out && (
-        <div className="absolute top-1.5 left-1.5 z-10 text-[9px] font-black uppercase tracking-widest bg-background/90 text-muted-foreground px-1.5 py-0.5 rounded-full border border-border">
-          нет в наличии
-        </div>
-      )}
       <div className="aspect-[4/5] sm:aspect-[3/4] grid place-items-center text-4xl sm:text-5xl bg-primary/5 border-b border-border/60 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-30"
@@ -485,26 +468,30 @@ function ProductCard({ product, onOpen }: { product: Product; onOpen: (p: Produc
         {product.volume && (
           <div className="text-[9px] sm:text-[10px] text-primary mt-0.5">{product.volume}</div>
         )}
-        <div className="mt-1.5 sm:mt-2 flex items-center justify-between gap-2">
-          <div className="font-display text-lg sm:text-xl">
-            {product.price}{" "}
-            <span className="text-[10px] sm:text-xs text-muted-foreground">BYN</span>
+<div className="mt-1.5 sm:mt-2 flex items-center justify-between gap-2">
+            <div className="font-display text-lg sm:text-xl">
+              {product.price}{" "}
+              <span className="text-[10px] sm:text-xs text-muted-foreground">BYN</span>
+            </div>
+            {product.stock_quantity === 0 ? (
+              <span className="text-[10px] sm:text-xs text-red-500 font-bold uppercase tracking-wider">
+                Нет в наличии
+              </span>
+            ) : (
+              <button
+                onClick={() => {
+                  add(product);
+                  toast.success(
+                    `${product.name}${product.flavor ? ` (${product.flavor})` : ""} в корзине`,
+                  );
+                }}
+                className="w-9 h-9 sm:w-9 sm:h-9 rounded-lg grid place-items-center bg-primary text-primary-foreground glow-soft active:translate-y-0.5"
+                aria-label="Добавить"
+              >
+                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={3} />
+              </button>
+            )}
           </div>
-          <button
-            onClick={() => {
-              if (out) return;
-              add(product);
-              toast.success(
-                `${product.name}${product.flavor ? ` (${product.flavor})` : ""} в корзине`,
-              );
-            }}
-            disabled={out}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg grid place-items-center bg-primary text-primary-foreground glow-soft active:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Добавить"
-          >
-            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={3} />
-          </button>
-        </div>
       </div>
     </div>
   );
@@ -531,7 +518,6 @@ function FloatingCartBar({ onOpen }: { onOpen: () => void }) {
 
 function ProductDetail({ product }: { product: Product }) {
   const { add } = useCart();
-  const out = !product.in_stock;
   const [broken, setBroken] = useState(false);
   return (
     <div className="space-y-2 sm:space-y-3">
@@ -563,17 +549,23 @@ function ProductDetail({ product }: { product: Product }) {
             {product.description}
           </div>
         )}
-        <button
-          onClick={() => {
-            if (out) return;
-            add(product);
-            toast.success(`${product.name} в корзине`);
-          }}
-          disabled={out}
-          className="mt-2 sm:mt-3 w-full bg-primary text-primary-foreground font-black uppercase tracking-widest py-2 sm:py-2.5 rounded-xl glow-soft disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
-        >
-          {out ? "Нет в наличии" : "В корзину"}
-        </button>
+        {product.stock_quantity === 0 ? (
+          <div className="mt-2 sm:mt-3 text-center">
+            <span className="text-red-500 font-bold text-xs sm:text-sm uppercase tracking-wider">
+              Нет в наличии — ждите пополнения
+            </span>
+          </div>
+        ) : (
+          <button
+            onClick={() => {
+              add(product);
+              toast.success(`${product.name} в корзине`);
+            }}
+            className="mt-2 sm:mt-3 w-full bg-primary text-primary-foreground font-black uppercase tracking-widest py-2 sm:py-2.5 rounded-xl glow-soft text-xs sm:text-sm"
+          >
+            В корзину
+          </button>
+        )}
       </div>
     </div>
   );
@@ -649,7 +641,7 @@ function CartDrawer({
               <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                 <button
                   onClick={() => setQty(i.product.id, i.qty - 1)}
-                  className="w-6 h-6 sm:w-7 sm:h-7 rounded grid place-items-center bg-muted"
+                  className="w-7 h-7 sm:w-7 sm:h-7 rounded grid place-items-center bg-muted"
                   aria-label="Уменьшить количество"
                 >
                   <Minus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
@@ -657,14 +649,14 @@ function CartDrawer({
                 <span className="w-5 sm:w-6 text-center font-bold text-xs sm:text-sm">{i.qty}</span>
                 <button
                   onClick={() => setQty(i.product.id, i.qty + 1)}
-                  className="w-6 h-6 sm:w-7 sm:h-7 rounded bg-primary text-primary-foreground grid place-items-center"
+                  className="w-7 h-7 sm:w-7 sm:h-7 rounded bg-primary text-primary-foreground grid place-items-center"
                   aria-label="Увеличить количество"
                 >
                   <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3" strokeWidth={3} />
                 </button>
                 <button
                   onClick={() => remove(i.product.id)}
-                  className="ml-0.5 sm:ml-1 w-6 h-6 sm:w-7 sm:h-7 rounded bg-destructive/20 text-destructive grid place-items-center"
+                  className="ml-0.5 sm:ml-1 w-7 h-7 sm:w-7 sm:h-7 rounded bg-destructive/20 text-destructive grid place-items-center"
                   aria-label="Удалить из корзины"
                 >
                   <Trash2 className="w-2.5 h-2.5 sm:w-3 sm:h-3" />

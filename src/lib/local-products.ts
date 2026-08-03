@@ -12,7 +12,7 @@ export const localProducts = [
     emoji: "💨",
     color: "cyan",
     image: null,
-    in_stock: true,
+    is_active: true,
     sort_order: 10,
   },
   {
@@ -28,7 +28,7 @@ export const localProducts = [
     emoji: "🍓",
     color: "pink",
     image: null,
-    in_stock: true,
+    is_active: true,
     sort_order: 20,
   },
   {
@@ -44,7 +44,7 @@ export const localProducts = [
     emoji: "🥭",
     color: "lime",
     image: null,
-    in_stock: true,
+    is_active: true,
     sort_order: 30,
   },
   {
@@ -60,7 +60,7 @@ export const localProducts = [
     emoji: "⚡",
     color: "pink",
     image: null,
-    in_stock: true,
+    is_active: true,
     sort_order: 110,
   },
   {
@@ -76,7 +76,7 @@ export const localProducts = [
     emoji: "⚡",
     color: "lime",
     image: null,
-    in_stock: true,
+    is_active: true,
     sort_order: 111,
   },
   {
@@ -92,7 +92,7 @@ export const localProducts = [
     emoji: "⚡",
     color: "cyan",
     image: null,
-    in_stock: true,
+    is_active: true,
     sort_order: 140,
   },
   {
@@ -108,7 +108,7 @@ export const localProducts = [
     emoji: "⚡",
     color: "pink",
     image: null,
-    in_stock: true,
+    is_active: true,
     sort_order: 153,
   },
   {
@@ -124,7 +124,7 @@ export const localProducts = [
     emoji: "🫐",
     color: "cyan",
     image: null,
-    in_stock: true,
+    is_active: true,
     sort_order: 210,
   },
   {
@@ -140,7 +140,7 @@ export const localProducts = [
     emoji: "🥤",
     color: "pink",
     image: null,
-    in_stock: true,
+    is_active: true,
     sort_order: 220,
   },
   {
@@ -156,7 +156,7 @@ export const localProducts = [
     emoji: "🔧",
     color: "pink",
     image: null,
-    in_stock: true,
+    is_active: true,
     sort_order: 310,
   },
   {
@@ -172,7 +172,7 @@ export const localProducts = [
     emoji: "🧩",
     color: "lime",
     image: null,
-    in_stock: true,
+    is_active: true,
     sort_order: 341,
   },
 ];

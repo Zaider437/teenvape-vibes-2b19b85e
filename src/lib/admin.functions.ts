@@ -63,23 +63,24 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
 }
 
 const productSchema = z.object({
-  id: z.string().optional().nullable(),
-  slug: z.string().trim().min(1).max(1000),
-  name: z.string().trim().min(1).max(1000),
-  brand: z.string().trim().min(1).max(1000),
-  category: z.string().trim().min(1).max(1000),
-  subcategory: z.string().trim().max(1000).optional().nullable(),
-  price: z.number().nonnegative(),
-  flavor: z.string().trim().max(1000).optional().nullable(),
-  puffs: z.string().trim().max(1000).optional().nullable(),
-  volume: z.string().trim().max(1000).optional().nullable(),
-  emoji: z.string().trim().min(1).max(100),
-  color: z.string().trim().min(1).max(100),
-  image_url: z.string().trim().max(2000).optional().nullable(),
-  description: z.string().trim().max(4000).optional().nullable(),
-  in_stock: z.boolean(),
-  sort_order: z.number().int(),
-});
+   id: z.string().optional().nullable(),
+   slug: z.string().trim().min(1).max(1000),
+   name: z.string().trim().min(1).max(1000),
+   brand: z.string().trim().min(1).max(1000),
+   category: z.string().trim().min(1).max(1000),
+   subcategory: z.string().trim().max(1000).optional().nullable(),
+   price: z.number().nonnegative(),
+   flavor: z.string().trim().max(1000).optional().nullable(),
+   puffs: z.string().trim().max(1000).optional().nullable(),
+   volume: z.string().trim().max(1000).optional().nullable(),
+   emoji: z.string().trim().min(1).max(100),
+   color: z.string().trim().min(1).max(100),
+   image_url: z.string().trim().max(2000).optional().nullable(),
+   description: z.string().trim().max(4000).optional().nullable(),
+   is_active: z.boolean(),
+   sort_order: z.number().int(),
+   stock_quantity: z.number().int().nonnegative(),
+ });
 
 export const adminListProducts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -95,6 +96,7 @@ export const adminListProducts = createServerFn({ method: "GET" })
       ...p,
       image_url: formatImageUrl(p.image_url),
       description: buildDescription(p),
+      is_active: p.is_active !== false,
     }));
   });
 
@@ -149,21 +151,37 @@ export const adminDeleteProduct = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const adminToggleStock = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ id: z.string(), in_stock: z.boolean() }).parse(input),
-  )
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("products" as any)
-      .update({ in_stock: data.in_stock })
-      .eq("id", data.id);
-    if (error) throw error;
-    return { ok: true };
-  });
+export const adminToggleActive = createServerFn({ method: "POST" })
+   .middleware([requireSupabaseAuth])
+   .inputValidator((input: unknown) =>
+     z.object({ id: z.string(), is_active: z.boolean() }).parse(input),
+   )
+   .handler(async ({ data, context }) => {
+     await assertAdmin(context);
+     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+     const { error } = await supabaseAdmin
+       .from("products" as any)
+       .update({ is_active: data.is_active })
+       .eq("id", data.id);
+     if (error) throw error;
+     return { ok: true };
+   });
+
+export const adminUpdateStock = createServerFn({ method: "POST" })
+   .middleware([requireSupabaseAuth])
+   .inputValidator((input: unknown) =>
+     z.object({ id: z.string(), stock_quantity: z.number().int().nonnegative() }).parse(input),
+   )
+   .handler(async ({ data, context }) => {
+     await assertAdmin(context);
+     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+     const { error } = await supabaseAdmin
+       .from("products" as any)
+       .update({ stock_quantity: data.stock_quantity })
+       .eq("id", data.id);
+     if (error) throw error;
+     return { ok: true };
+   });
 
 export const adminMoveOrCopyProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -217,7 +235,7 @@ export const adminMoveOrCopyProduct = createServerFn({ method: "POST" })
       color: src.color,
       image_url: src.image_url,
       description: src.description,
-      in_stock: src.in_stock,
+      is_active: src.is_active,
       sort_order: src.sort_order,
     });
     if (insertError) throw insertError;
@@ -352,14 +370,14 @@ export const getAnimationSettings = createServerFn({ method: "GET" }).handler(as
     console.error("Failed to fetch animation settings:", error);
   }
   let settings = {
-    leaves: { enabled: true, from: 9, to: 11 },
-    snow: { enabled: true, from: 12, to: 2 },
+    leaves: { enabled: true, from: 9, to: 11, count: 30 },
+    snow: { enabled: true, from: 12, to: 2, count: 40 },
   };
   if (data && data.note) {
     try {
       settings = JSON.parse(data.note) as {
-        leaves: { enabled: boolean; from: number; to: number };
-        snow: { enabled: boolean; from: number; to: number };
+        leaves: { enabled: boolean; from: number; to: number; count: number };
+        snow: { enabled: boolean; from: number; to: number; count: number };
       };
     } catch (e) {
       console.error("Failed to parse animation settings:", e);
@@ -379,11 +397,13 @@ export const adminUpdateAnimationSettings = createServerFn({ method: "POST" })
           enabled: z.boolean(),
           from: z.number().min(1).max(12),
           to: z.number().min(1).max(12),
+          count: z.number().min(0).max(200),
         }),
         snow: z.object({
           enabled: z.boolean(),
           from: z.number().min(1).max(12),
           to: z.number().min(1).max(12),
+          count: z.number().min(0).max(200),
         }),
       })
       .parse(input),

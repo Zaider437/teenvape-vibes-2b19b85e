@@ -216,6 +216,23 @@ export const createOrder = createServerFn({ method: "POST" })
       console.warn("[order] telegram notification skipped:", err);
     }
 
+    // Decrement stock quantities for ordered products
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      for (const item of trustedItems) {
+        const dbProduct = byId.get(item.id);
+        if (dbProduct && dbProduct.stock_quantity !== undefined) {
+          const newQty = Math.max(0, dbProduct.stock_quantity - item.qty);
+          await supabaseAdmin
+            .from("products" as any)
+            .update({ stock_quantity: newQty })
+            .eq("id", item.id);
+        }
+      }
+    } catch (err) {
+      console.warn("[order] stock decrement failed:", err);
+    }
+
     return { id: orderData.id, emailSent, cancellationToken };
   });
 

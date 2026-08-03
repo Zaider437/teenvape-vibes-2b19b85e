@@ -11,8 +11,9 @@ export const mockProducts = [
     volume: "10ml",
     emoji: "💨",
     color: "pink",
-    in_stock: true,
+    is_active: true,
     sort_order: 1,
+    stock_quantity: 10,
   },
   {
     id: "2",
@@ -26,7 +27,8 @@ export const mockProducts = [
     volume: null,
     emoji: "⚡",
     color: "cyan",
-    in_stock: true,
+    is_active: true,
     sort_order: 2,
+    stock_quantity: 5,
   },
 ];

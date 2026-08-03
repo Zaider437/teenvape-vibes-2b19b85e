@@ -99,7 +99,7 @@ async function importFromMigration() {
       emoji: product.emoji,
       color: product.color,
       image_url: product.image_url,
-      in_stock: true,
+      is_active: true,
       sort_order: product.sort_order,
       updated_at: new Date().toISOString()
     };

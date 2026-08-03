@@ -13,8 +13,9 @@ const mockProduct1: Product = {
   price: 10.0,
   emoji: "⚡",
   color: "cyan",
-  in_stock: true,
+  is_active: true,
   sort_order: 1,
+  stock_quantity: 10,
 };
 
 const mockProduct2: Product = {
@@ -26,8 +27,9 @@ const mockProduct2: Product = {
   price: 15.5,
   emoji: "🧪",
   color: "pink",
-  in_stock: true,
+  is_active: true,
   sort_order: 2,
+  stock_quantity: 5,
 };
 
 describe("Cart Context & Hook", () => {

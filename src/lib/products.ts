@@ -33,8 +33,9 @@ export type Product = {
   emoji: string;
   color: "lime" | "pink" | "cyan" | string;
   image?: string | null;
-  in_stock: boolean;
+  is_active: boolean;
   sort_order: number;
+  stock_quantity?: number;
   description?: string | null;
 };
 
@@ -50,7 +51,7 @@ export const PRODUCTS: Product[] = [
     puffs: "5000 затяжек",
     emoji: "💨",
     color: "cyan",
-    in_stock: true,
+    is_active: true,
     sort_order: 10,
     description: "",
   },
@@ -65,7 +66,7 @@ export const PRODUCTS: Product[] = [
     puffs: "5000 затяжек",
     emoji: "🍓",
     color: "pink",
-    in_stock: true,
+    is_active: true,
     sort_order: 20,
     description: "",
   },
@@ -80,7 +81,7 @@ export const PRODUCTS: Product[] = [
     puffs: "1200 затяжек",
     emoji: "🥭",
     color: "lime",
-    in_stock: true,
+    is_active: true,
     sort_order: 30,
     description: "",
   },
@@ -95,7 +96,7 @@ export const PRODUCTS: Product[] = [
     puffs: "10000 затяжек",
     emoji: "🍉",
     color: "lime",
-    in_stock: true,
+    is_active: true,
     sort_order: 40,
     description: "",
   },
@@ -110,7 +111,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "pink",
     image: xp2Pink.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 110,
     description: "",
   },
@@ -125,7 +126,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "lime",
     image: xp2Green.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 111,
     description: "",
   },
@@ -140,7 +141,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "pink",
     image: xp2Lilac.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 112,
     description: "",
   },
@@ -153,7 +154,7 @@ export const PRODUCTS: Product[] = [
     price: 48,
     emoji: "🔥",
     color: "pink",
-    in_stock: true,
+    is_active: true,
     sort_order: 120,
     description: "",
   },
@@ -166,7 +167,7 @@ export const PRODUCTS: Product[] = [
     price: 42,
     emoji: "💎",
     color: "lime",
-    in_stock: true,
+    is_active: true,
     sort_order: 130,
     description: "",
   },
@@ -181,7 +182,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "cyan",
     image: silver.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 140,
     description: "",
   },
@@ -196,7 +197,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "cyan",
     image: iceBlue.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 141,
     description: "",
   },
@@ -211,7 +212,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "cyan",
     image: carbon.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 142,
     description: "",
   },
@@ -226,7 +227,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "cyan",
     image: black.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 143,
     description: "",
   },
@@ -241,7 +242,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "pink",
     image: "/assets/images/photo_5400171637098879579_x.jpg",
-    in_stock: true,
+    is_active: true,
     sort_order: 144,
     description: "",
   },
@@ -256,7 +257,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "cyan",
     image: sky.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 145,
     description: "",
   },
@@ -271,7 +272,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "pink",
     image: "/assets/images/photo_5400171637098879578_x.jpg",
-    in_stock: true,
+    is_active: true,
     sort_order: 146,
     description: "",
   },
@@ -286,7 +287,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "pink",
     image: pinkTextured.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 147,
     description: "",
   },
@@ -301,7 +302,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "cyan",
     image: white.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 148,
     description: "",
   },
@@ -316,7 +317,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "pink",
     image: x5Purple.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 150,
     description: "",
   },
@@ -331,7 +332,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "pink",
     image: x5Lilac.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 151,
     description: "",
   },
@@ -346,7 +347,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "lime",
     image: x5Mint.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 152,
     description: "",
   },
@@ -361,7 +362,7 @@ export const PRODUCTS: Product[] = [
     emoji: "⚡",
     color: "pink",
     image: x5Red.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 153,
     description: "",
   },
@@ -376,7 +377,7 @@ export const PRODUCTS: Product[] = [
     volume: "30 мл / 20 мг",
     emoji: "🫐",
     color: "cyan",
-    in_stock: true,
+    is_active: true,
     sort_order: 210,
     description: "",
   },
@@ -391,7 +392,7 @@ export const PRODUCTS: Product[] = [
     volume: "30 мл / 20 мг",
     emoji: "🥤",
     color: "pink",
-    in_stock: true,
+    is_active: true,
     sort_order: 220,
     description: "",
   },
@@ -406,7 +407,7 @@ export const PRODUCTS: Product[] = [
     volume: "30 мл / 20 мг",
     emoji: "🍉",
     color: "lime",
-    in_stock: true,
+    is_active: true,
     sort_order: 230,
     description: "",
   },
@@ -421,7 +422,7 @@ export const PRODUCTS: Product[] = [
     volume: "30 мл / 20 мг",
     emoji: "🍑",
     color: "pink",
-    in_stock: true,
+    is_active: true,
     sort_order: 240,
     description: "",
   },
@@ -436,7 +437,7 @@ export const PRODUCTS: Product[] = [
     volume: "2 мл / 1.0Ω",
     emoji: "🔧",
     color: "pink",
-    in_stock: true,
+    is_active: true,
     sort_order: 310,
     description: "",
   },
@@ -451,7 +452,7 @@ export const PRODUCTS: Product[] = [
     volume: "0.6Ω Mesh",
     emoji: "🌀",
     color: "lime",
-    in_stock: true,
+    is_active: true,
     sort_order: 320,
     description: "",
   },
@@ -466,7 +467,7 @@ export const PRODUCTS: Product[] = [
     volume: "10 полос",
     emoji: "☁️",
     color: "lime",
-    in_stock: true,
+    is_active: true,
     sort_order: 330,
     description: "",
   },
@@ -482,7 +483,7 @@ export const PRODUCTS: Product[] = [
     emoji: "🧩",
     color: "cyan",
     image: podBarr.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 340,
     description: "",
   },
@@ -498,7 +499,7 @@ export const PRODUCTS: Product[] = [
     emoji: "🧩",
     color: "lime",
     image: podCorex06.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 341,
     description: "",
   },
@@ -514,7 +515,7 @@ export const PRODUCTS: Product[] = [
     emoji: "🧩",
     color: "lime",
     image: podCorex08.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 342,
     description: "",
   },
@@ -530,7 +531,7 @@ export const PRODUCTS: Product[] = [
     emoji: "🧩",
     color: "lime",
     image: podCorex04.url,
-    in_stock: true,
+    is_active: true,
     sort_order: 343,
     description: "",
   },
@@ -578,7 +579,7 @@ export async function fetchProducts(): Promise<Product[]> {
 
       if (error) throw error;
       if (data && data.length > 0) {
-        const mapped = data.map((p: any) => {
+const mapped = data.map((p: any) => {
           return {
             id: p.id,
             slug: p.slug,
@@ -592,20 +593,22 @@ export async function fetchProducts(): Promise<Product[]> {
             emoji: p.emoji,
             color: p.color,
             image: formatImageUrl(p.image_url),
-            in_stock: p.in_stock,
+            is_active: p.is_active !== false,
             sort_order: p.sort_order,
+            stock_quantity: p.stock_quantity ?? 0,
             description: buildDescription(p),
           };
         });
-        cachedProducts = mapped;
-        cachedProductsExpiry = Date.now() + 30 * 1000; // Cache for 30 seconds
-        return mapped;
+        cachedProducts = mapped.filter((p) => p.is_active);
+        cachedProductsExpiry = Date.now() + 30 * 1000;
+        return mapped.filter((p) => p.is_active);
       }
       const fallback = PRODUCTS.map((p) => ({
         ...p,
         image: formatImageUrl(p.image),
         description: buildDescription(p),
-      }));
+        stock_quantity: 0,
+      })).filter((p) => p.is_active);
       cachedProducts = fallback;
       cachedProductsExpiry = Date.now() + 30 * 1000;
       return fallback;
@@ -616,7 +619,8 @@ export async function fetchProducts(): Promise<Product[]> {
       ...p,
       image: formatImageUrl(p.image),
       description: buildDescription(p),
-    }));
+      stock_quantity: 0,
+    })).filter((p) => p.is_active);
     cachedProducts = fallback;
     cachedProductsExpiry = Date.now() + 30 * 1000;
     return fallback;
@@ -630,7 +634,7 @@ export async function fetchProducts(): Promise<Product[]> {
           ...p,
           image: formatImageUrl(p.image),
           description: buildDescription(p),
-        })),
+        })).filter((p) => p.is_active),
       );
     }, 10000),
   );
