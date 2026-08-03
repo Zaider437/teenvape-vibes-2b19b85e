@@ -6,7 +6,7 @@ const supabaseUrl = 'https://ueazjqvxjlppgtkhcmut.supabase.co';
 const supabaseKey = 'sb_secret_LzJIRzi7EsB-b2bZaAtYUg_juFQG2YL';
   
   
-}const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function importFromMigration() {
   console.log("Reading migration file...");
