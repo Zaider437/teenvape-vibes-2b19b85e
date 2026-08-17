@@ -177,6 +177,11 @@ function ProductsAdmin() {
     [rows, filter],
   );
   const hasSub = filter !== "all";
+  const subcategoryOptions = useMemo(() => {
+    if (!hasSub) return [] as string[];
+    return Array.from(new Set(inCategory.map((r) => r.subcategory).filter((s): s is string => !!s))).sort();
+  }, [inCategory, hasSub]);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("all");
   const brandOptions = useMemo(() => {
     if (!hasSub) return [] as string[];
     return Array.from(new Set(inCategory.map((r) => r.brand))).sort();
@@ -193,6 +198,7 @@ function ProductsAdmin() {
     if (hasSub) {
       if (brand !== "all") list = list.filter((r) => r.brand === brand);
       if (flavor !== "all") list = list.filter((r) => r.flavor === flavor);
+      if (selectedSubcategory !== "all") list = list.filter((r) => r.subcategory === selectedSubcategory);
     }
     const q = query.trim().toLowerCase();
     if (!q) return list;
@@ -203,11 +209,12 @@ function ProductsAdmin() {
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [inCategory, hasSub, brand, flavor, query]);
+  }, [inCategory, hasSub, brand, flavor, selectedSubcategory, query]);
   function selectCategory(id: string) {
     setFilter(id);
     setBrand("all");
     setFlavor("all");
+    setSelectedSubcategory("all");
   }
 
 function edit(row: ProductRow) {
@@ -456,6 +463,31 @@ try {
               onChange={setFlavor}
             />
           )}
+        </div>
+      )}
+
+      {hasSub && subcategoryOptions.length > 0 && (
+        <div className="space-y-1.5">
+          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Подкаталоги
+          </div>
+          <div className="flex flex-col gap-1">
+            <button
+              onClick={() => setSelectedSubcategory("all")}
+              className={`text-left px-3 py-2 rounded-lg border text-xs font-semibold transition-colors ${selectedSubcategory === "all" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-primary hover:bg-primary/5"}`}
+            >
+              Все подкаталоги
+            </button>
+            {subcategoryOptions.map((sub) => (
+              <button
+                key={sub}
+                onClick={() => setSelectedSubcategory(sub)}
+                className={`text-left px-3 py-2 rounded-lg border text-xs font-semibold transition-colors ${selectedSubcategory === sub ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-primary hover:bg-primary/5"}`}
+              >
+                {sub}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
